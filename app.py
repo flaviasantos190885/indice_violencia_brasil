@@ -11,7 +11,6 @@ st.set_page_config(layout="wide", page_title="Análise de Violência no Brasil")
 warnings.filterwarnings("ignore", category=FutureWarning)
 
 # --- FUNÇÃO DE CACHE PARA CARREGAR OS ATIVOS DE PREVISÃO ---
-# @st.cache_resource garante que o modelo pesado e os arquivos sejam carregados apenas uma vez.
 @st.cache_resource
 def carregar_ativos_previsao():
     """Carrega o modelo, o pré-processador e o normalizador salvos."""
@@ -24,13 +23,12 @@ def carregar_ativos_previsao():
         return None, None, None
 
 # --- CARREGAMENTO INICIAL DE DADOS ---
-# Carrega o dataset para o dashboard e para a lógica de previsão
 try:
     df_completo = pd.read_csv("Dados_2015_2024.csv")
     df_completo['data_referencia'] = pd.to_datetime(df_completo['data_referencia'], errors='coerce')
 except FileNotFoundError:
     st.error("Erro: O arquivo 'Dados_2015_2024.csv' não foi encontrado. Por favor, coloque-o na mesma pasta.")
-    st.stop() # Interrompe a execução se o arquivo principal não for encontrado
+    st.stop()
 
 # --- BARRA LATERAL DE NAVEGAÇÃO ---
 with st.sidebar:
@@ -42,96 +40,181 @@ with st.sidebar:
     st.markdown("---")
     st.info("Este painel oferece uma análise visual dos dados de violência e um módulo para estimativas futuras.")
 
-
 # ==============================================================================
-# --- SEÇÃO 1: DASHBOARD DE ANÁLISE (COM AS CORREÇÕES) ---
+# --- SEÇÃO 1: DASHBOARD DE ANÁLISE (RESTAURADA DO ORIGINAL) ---
 # ==============================================================================
 if pagina_selecionada == "Dashboard de Análise":
-    
-    st.markdown("<h1 style='text-align: center; color: white;'>📊 Dashboard da Violência no Brasil</h1>", unsafe_allow_html=True)
-    st.markdown("---")
 
     df = df_completo.copy()
     df['Ano'] = df['data_referencia'].dt.year
-    df['Mês'] = df['data_referencia'].dt.strftime('%B') # Usar strftime para pegar o nome completo do mês
+    df['Mes'] = df['data_referencia'].dt.month_name()
+
+    # Traduz meses
     meses_pt = {
         'January': 'Janeiro', 'February': 'Fevereiro', 'March': 'Março', 'April': 'Abril',
         'May': 'Maio', 'June': 'Junho', 'July': 'Julho', 'August': 'Agosto',
         'September': 'Setembro', 'October': 'Outubro', 'November': 'Novembro', 'December': 'Dezembro'
     }
-    df['Mês'] = df['Mês'].map(meses_pt)
-    
-    # Seus filtros e gráficos do dashboard original...
+    df['Mes'] = df['Mes'].map(meses_pt)
+
+    # ---------- TÍTULO GLOBAL ----------
+    st.markdown("<h1 style='text-align: center; font-size: 40px; color: white'>📊 Dados da Violência no Brasil</h1>", unsafe_allow_html=True)
+
+    # Filtros disponíveis
     anos = sorted(df['Ano'].unique())
     todos_estados = sorted(df['uf'].unique())
     eventos = sorted(df['evento'].unique())
-    
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        ano_selecionado = st.selectbox("Selecione o Ano", anos)
-    with col2:
-        # Mudado para um selectbox para simplicidade, já que o multiselect pode ser complexo com o gráfico de linha
-        estado_selecionado = st.selectbox("Selecione o Estado", ["Todos os Estados"] + todos_estados)
-    with col3:
-        evento_input = st.selectbox("Tipo de Evento", ["Todos"] + eventos)
-    
-    # A lógica para a cidade aparecer condicionalmente foi mantida
-    cidade_input = "Todas"
-    if estado_selecionado != "Todos os Estados":
-        cidades = sorted(df[df['uf'] == estado_selecionado]['municipio'].unique())
-        cidade_input = st.selectbox("Selecione a Cidade", ["Todas"] + cidades)
 
-    # Aplicação dos filtros
+    # Filtros
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        ano_selecionado = st.selectbox("Selecione o Ano", anos, key="ano")
+
+    with col2:
+        estado_selecionado = st.multiselect(
+            "Selecione os Estados",
+            options=todos_estados,
+            key="estado",
+            placeholder="Todos"
+        )
+
+    with col3:
+        evento_input = st.selectbox("Tipo de Evento", ["Todos"] + eventos, key="evento")
+
+    # Estados filtrados
+    if not estado_selecionado:
+        estados_filtrados = todos_estados
+    else:
+        estados_filtrados = estado_selecionado
+
+    # Filtro de cidade condicional
+    if len(estados_filtrados) == 1:
+        cidades = df[df['uf'] == estados_filtrados[0]]['municipio'].sort_values().unique()
+        cidade_input = st.selectbox("Selecione a Cidade", ["Todas"] + list(cidades), index=0, key="cidade")
+    else:
+        st.selectbox("Selecione a Cidade", ["Todas"], index=0, disabled=True, key="cidade_disabled")
+        cidade_input = "Todas"
+
+    # Aplicando filtros
     df_filtrado = df[df['Ano'] == ano_selecionado]
-    if estado_selecionado != "Todos os Estados":
-        df_filtrado = df_filtrado[df_filtrado['uf'] == estado_selecionado]
+    df_filtrado = df_filtrado[df_filtrado['uf'].isin(estados_filtrados)]
+
     if cidade_input != "Todas":
         df_filtrado = df_filtrado[df_filtrado['municipio'] == cidade_input]
+
     if evento_input != "Todos":
         df_filtrado = df_filtrado[df_filtrado['evento'] == evento_input]
-    
-    # --- GRÁFICO DE BARRAS ---
-    st.markdown("### Total de Vítimas por Estado")
+
+    # ---------- TÍTULO ESPECÍFICO ----------
+    if evento_input == "Todos":
+        titulo = f"Casos de violência no Brasil - {ano_selecionado}"
+    else:
+        titulo = f"{evento_input} - {ano_selecionado}"
+    st.markdown(f"<h2 style='font-size: 36px; color: white; font-weight: bold !important;'>{titulo}</h2>", unsafe_allow_html=True)
+
+    # ---------- GRÁFICO DE BARRAS ----------
+    st.markdown("<h3 style='font-size: 22px; color: white;'>Total de Vítimas por Estado</h3>", unsafe_allow_html=True)
     df_barra = df_filtrado.groupby('uf')['total_vitima'].sum().reset_index()
-    fig_barra = px.bar(df_barra, x='uf', y='total_vitima', text_auto=True, labels={'uf': 'Estado', 'total_vitima': 'Total de Vítimas'}, color='uf')
-    
-    # --- CORREÇÃO 1: Adicionando esta linha para deixar as barras mais largas ---
-    fig_barra.update_layout(bargap=0.1) # Experimente valores entre 0 e 0.2
 
-    st.plotly_chart(fig_barra, use_container_width=True)
+    if len(estados_filtrados) == 1:
+        total_estado = df_barra['total_vitima'].iloc[0]
+        df_barra['uf'] = df_barra['uf'] + f' (Total: {total_estado})'
 
-    # --- GRÁFICO DE LINHA ---
-    st.markdown("### Evolução Mensal dos Casos")
-    
-    # --- CORREÇÃO 2: Lógica robusta de preparação de dados para o gráfico de linha ---
-    # Usamos o df_filtrado da seleção principal para manter a consistência
-    df_para_linha = df_filtrado.copy()
-    
-    # Agrupamos os dados por Mês e Estado
-    df_evolucao_mensal = df_para_linha.groupby(['Mês', 'uf'])['total_vitima'].sum().reset_index()
-
-    # Definimos a ordem correta dos meses para o eixo X
-    ordem_meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho','Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro']
-    df_evolucao_mensal['Mês'] = pd.Categorical(df_evolucao_mensal['Mês'], categories=ordem_meses, ordered=True)
-
-    # Ordenamos os dados pelo mês para que as linhas sejam desenhadas corretamente
-    df_evolucao_mensal = df_evolucao_mensal.sort_values('Mês')
-
-    # Criamos o gráfico de linha com os dados preparados
-    fig_linha = px.line(
-        df_evolucao_mensal,
-        x='Mês',
+    fig_barra = px.bar(
+        df_barra,
+        x='uf',
         y='total_vitima',
-        color='uf', # Mantém uma linha por estado no dataframe filtrado
-        markers=True,
-        labels={'total_vitima': 'Total de Vítimas', 'Mês': 'Mês', 'uf': 'Estado'},
-        title='Evolução Mensal dos Casos por Estado' if estado_selecionado == "Todos os Estados" else f'Evolução Mensal dos Casos em {estado_selecionado}'
+        text='total_vitima',
+        labels={'uf': 'Estado', 'total_vitima': 'Total de Vítimas'},
+        color='uf'
     )
-    st.plotly_chart(fig_linha, use_container_width=True)
+    fig_barra.update_traces(textposition='outside')
+    st.plotly_chart(fig_barra)
 
-    # --- TABELA DE DADOS ---
-    st.markdown("### Dados Filtrados")
-    st.dataframe(df_filtrado.drop(columns=['Ano', 'Mês']))
+    # ---------- GRÁFICO DE LINHA ----------
+    st.subheader("Evolução Mensal dos Casos por Estado")
+    df_linha = df_filtrado.groupby(['uf', 'Mes'])['total_vitima'].sum().reset_index()
+    ordem_meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+                   'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro']
+    df_linha['Mes'] = pd.Categorical(df_linha['Mes'], categories=ordem_meses, ordered=True)
+    df_linha = df_linha.sort_values(['uf', 'Mes'])
+
+    fig_linha = px.line(
+        df_linha,
+        x='Mes',
+        y='total_vitima',
+        color='uf',
+        markers=True,
+        labels={'Mes': 'Mês', 'total_vitima': 'Total de Vítimas', 'uf': 'Estado'}
+    )
+    fig_linha.update_traces(textposition='top center')
+    st.plotly_chart(fig_linha)
+
+    # ---------- GRÁFICO DE PIZZA ----------
+    st.subheader("Distribuição de Tipos de Armas por Faixa Etária")
+    col4, col5 = st.columns(2)
+
+    with col4:
+        faixa_etaria_input = st.selectbox(
+            "Selecione a Faixa Etária",
+            options=["Todas"] + sorted(df_filtrado['faixa_etaria'].dropna().unique().tolist()),
+            key="faixa"
+        )
+
+    with col5:
+        tipo_arma_input = st.selectbox(
+            "Selecione o Tipo de Arma",
+            options=["Todas"] + sorted(df_filtrado['arma'].dropna().unique().tolist()),
+            key="arma"
+        )
+
+    df_pizza = df_filtrado.copy()
+    if faixa_etaria_input != "Todas":
+        df_pizza = df_pizza[df_pizza['faixa_etaria'] == faixa_etaria_input]
+    if tipo_arma_input != "Todas":
+        df_pizza = df_pizza[df_pizza['arma'] == tipo_arma_input]
+
+    dados_pizza = df_pizza.groupby('arma').size().reset_index(name='quantidade')
+    dados_pizza = dados_pizza.rename(columns={'arma': 'Tipo de Arma'})
+
+    if not dados_pizza.empty:
+        fig_pizza = px.pie(
+            dados_pizza,
+            names='Tipo de Arma',
+            values='quantidade',
+            title="Distribuição de Armas (Filtrada)",
+            hole=0.4
+        )
+        st.plotly_chart(fig_pizza)
+    else:
+        st.warning("Nenhum dado disponível para os filtros selecionados.")
+
+    # ---------- TABELA ----------
+    colunas_para_mostrar = df_filtrado.drop(columns=['Ano'])
+    colunas_para_mostrar = colunas_para_mostrar[
+        (df_filtrado['feminino'] >= 1) |
+        (df_filtrado['masculino'] >= 1) |
+        (df_filtrado['nao_informado'] >= 1)
+    ].copy()
+
+    colunas_para_mostrar['data_referencia'] = pd.to_datetime(colunas_para_mostrar['data_referencia']).dt.strftime('%d-%m-%Y')
+
+    colunas_numericas = colunas_para_mostrar.select_dtypes(include='number')
+    colunas_validas = colunas_numericas.columns[colunas_numericas.sum() > 0]
+
+    colunas_para_mostrar = pd.concat([
+        colunas_para_mostrar.select_dtypes(exclude='number'),
+        colunas_para_mostrar[colunas_validas]
+    ], axis=1)
+
+    colunas_para_mostrar.reset_index(drop=True, inplace=True)
+    st.subheader("Dados Filtrados")
+    st.dataframe(colunas_para_mostrar)
+
+    # Rodapé
+    st.markdown("---")
+    st.markdown("Desenvolvido por Flavia 💙")
 
 # ==============================================================================
 # --- SEÇÃO 2: MÓDULO DE PREVISÃO (SEU CÓDIGO JÁ CORRIGIDO) ---
