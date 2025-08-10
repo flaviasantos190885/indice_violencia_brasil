@@ -1,12 +1,7 @@
-# Framework do App
-streamlit
-
-# Manipulação de Dados e Gráficos
-pandas
-numpy
-plotly
-
-# Machine Learning e Modelos
-scikit-learn
-joblib
-tensorflow
+streamlit==1.48.0
+pandas==2.2.2
+plotly==5.24.1
+numpy==2.0.2
+scikit-learn==1.6.1
+joblib==1.5.1
+tensorflow==2.19.0
