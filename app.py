@@ -131,9 +131,6 @@ elif pagina_selecionada == "Módulo de Previsão":
         
         @st.dialog("Parâmetros da Previsão", width="large")
         def prediction_dialog():
-            # O restante do seu código foi movido para DENTRO desta função.
-            # A indentação foi ajustada.
-            
             st.markdown("#### Preencha os campos para gerar a estimativa:")
             
             # INPUTS DENTRO DO POPUP
@@ -157,7 +154,7 @@ elif pagina_selecionada == "Módulo de Previsão":
                 if arma_selecionada != "Todos": df_filtrado_pred = df_filtrado_pred[df_filtrado_pred['arma'] == arma_selecionada]
                 if faixa_selecionada != "Todos": df_filtrado_pred = df_filtrado_pred[df_filtrado_pred['faixa_etaria'] == faixa_selecionada]
 
-                # Lógica de previsão (mesma do script anterior)
+                # Lógica de previsão
                 janela = 10
                 if len(df_filtrado_pred) < janela:
                     st.error(f"Dados históricos insuficientes ({len(df_filtrado_pred)} eventos) para o cenário. Tente filtros menos específicos.")
@@ -172,12 +169,19 @@ elif pagina_selecionada == "Módulo de Previsão":
                         
                         sequencia_final_df = pd.concat([sequencia_base, evento_futuro_template], ignore_index=True)
                         
-                        # Garante que as colunas categóricas sejam do tipo 'category' para o pré-processador
+                        # --- INÍCIO DA CORREÇÃO ---
+                        
+                        # 1. PRIMEIRO, CRIAMOS O DATAFRAME X_para_prever
+                        X_para_prever = sequencia_final_df.drop(columns=['total_vitima', 'data_referencia', 'municipio'])
+
+                        # 2. DEPOIS, COM ELE JÁ CRIADO, AJUSTAMOS OS TIPOS DAS COLUNAS
+                        # (Este bloco foi movido para depois da criação de X_para_prever)
                         for col in X_para_prever.select_dtypes(include=['object']).columns:
                              if col in preprocessor.feature_names_in_:
                                 X_para_prever[col] = X_para_prever[col].astype('category')
+                        
+                        # --- FIM DA CORREÇÃO ---
 
-                        X_para_prever = sequencia_final_df.drop(columns=['total_vitima', 'data_referencia', 'municipio'])
                         X_processado = preprocessor.transform(X_para_prever)
                         X_final = np.reshape(X_processado, (1, X_processado.shape[0], X_processado.shape[1]))
                         
@@ -194,8 +198,3 @@ elif pagina_selecionada == "Módulo de Previsão":
                     delta_color="off"
                 )
                 st.caption(f"Cálculo baseado em uma previsão de {int(vitimas_por_evento)} vítimas por evento, multiplicado pela média de {media_eventos_ano:.1f} eventos/ano para o cenário escolhido.")
-
-        # ADICIONAMOS: a chamada da função que acabamos de definir para que o dialog apareça.
-        prediction_dialog()
-        
-        # --- FIM DA ALTERAÇÃO ---
