@@ -333,3 +333,7 @@ elif pagina_selecionada == "Módulo de Previsão":
         
         # Esta linha chama a função que definimos acima, fazendo o dialog aparecer
         prediction_dialog()
+
+    # Rodapé
+        st.markdown("---")
+        st.markdown("Desenvolvido por Flavia 💙")
