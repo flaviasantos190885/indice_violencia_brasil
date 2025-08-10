@@ -1,6 +1,12 @@
+# Framework do App
 streamlit
+
+# Manipulação de Dados e Gráficos
 pandas
-plotly
 numpy
-joblib
+plotly
+
+# Machine Learning e Modelos
 scikit-learn
+joblib
+tensorflow
