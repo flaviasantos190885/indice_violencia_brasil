@@ -108,12 +108,25 @@ if pagina_selecionada == "Dashboard de Análise":
     if evento_input != "Todos":
         df_filtrado = df_filtrado[df_filtrado['evento'] == evento_input]
 
-    # ---------- TÍTULO ESPECÍFICO ----------
+    # ---------- TÍTULO ESPECÍFICO (VERSÃO ATUALIZADA) ----------
+
+    # 1. CALCULAMOS O TOTAL DE VÍTIMAS DO DATAFRAME JÁ FILTRADO
+    total_vitimas = df_filtrado['total_vitima'].sum()
+    # Formata o número para ter separador de milhar (ex: 12.345)
+    total_formatado = f"{total_vitimas:,}".replace(',', '.')
+
+    # 2. DEFINIMOS A PARTE INICIAL DO TÍTULO
     if evento_input == "Todos":
-        titulo = f"Casos de violência no Brasil - {ano_selecionado}"
+        titulo_base = f"Casos de violência no Brasil - {ano_selecionado}"
     else:
-        titulo = f"{evento_input} - {ano_selecionado}"
-    st.markdown(f"<h2 style='font-size: 36px; color: white; font-weight: bold !important;'>{titulo}</h2>", unsafe_allow_html=True)
+        titulo_base = f"{evento_input} - {ano_selecionado}"
+
+    # 3. JUNTAMOS TUDO NO TÍTULO FINAL E EXIBIMOS
+    # Note que adicionei "Total de Vítimas:" para dar contexto ao número
+    titulo_final = f"{titulo_base} (Total de Vítimas: {total_formatado})"
+
+    # Diminuí um pouco a fonte para caber melhor na tela
+    st.markdown(f"<h2 style='font-size: 32px; color: white; font-weight: bold !important;'>{titulo_final}</h2>", unsafe_allow_html=True)
 
     # ---------- GRÁFICO DE BARRAS ----------
     st.markdown("<h3 style='font-size: 22px; color: white;'>Total de Vítimas por Estado</h3>", unsafe_allow_html=True)
