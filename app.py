@@ -132,14 +132,31 @@ if pagina_selecionada == "Dashboard de Análise":
     fig_barra.update_traces(textposition='outside')
     st.plotly_chart(fig_barra)
 
-    # ---------- GRÁFICO DE LINHA ----------
+# ---------- GRÁFICO DE LINHA ----------
     st.subheader("Evolução Mensal dos Casos por Estado")
-    df_linha = df_filtrado.groupby(['uf', 'Mes'])['total_vitima'].sum().reset_index()
+
+    # Ordem dos meses
     ordem_meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-                   'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro']
+                'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro']
+
+    # Criar base com todos os meses para todos os estados filtrados
+    todos_meses_df = pd.DataFrame([
+        {"uf": uf, "Mes": mes}
+        for uf in estados_filtrados
+        for mes in ordem_meses
+    ])
+
+    # Agrupar dados reais
+    df_linha = df_filtrado.groupby(['uf', 'Mes'])['total_vitima'].sum().reset_index()
+
+    # Unir com todos os meses para preencher zeros onde não houver dados
+    df_linha = todos_meses_df.merge(df_linha, on=["uf", "Mes"], how="left").fillna({"total_vitima": 0})
+
+    # Ordenar meses corretamente
     df_linha['Mes'] = pd.Categorical(df_linha['Mes'], categories=ordem_meses, ordered=True)
     df_linha = df_linha.sort_values(['uf', 'Mes'])
 
+    # Criar gráfico
     fig_linha = px.line(
         df_linha,
         x='Mes',
@@ -150,6 +167,7 @@ if pagina_selecionada == "Dashboard de Análise":
     )
     fig_linha.update_traces(textposition='top center')
     st.plotly_chart(fig_linha)
+
 
     # ---------- GRÁFICO DE PIZZA ----------
     st.subheader("Distribuição de Tipos de Armas por Faixa Etária")
