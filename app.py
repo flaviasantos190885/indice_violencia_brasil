@@ -230,14 +230,6 @@ if pagina_selecionada == "Dashboard de Análise":
     st.markdown("Desenvolvido por Flavia 💙")
 
 # ==============================================================================
-# --- SEÇÃO 2: MÓDULO DE PREVISÃO (SEU CÓDIGO JÁ CORRIGIDO) ---
-# ==============================================================================
-elif pagina_selecionada == "Módulo de Previsão":
-    # Cole aqui a versão completa e corrigida da Seção 2 que te enviei anteriormente.
-    # Se precisar dela novamente, é só pedir!
-    st.markdown("<h1 style='text-align: center; color: white;'>🧠 Módulo de Previsão Anual</h1>", unsafe_allow_html=True)
-    # ... (Restante do código da Seção 2) ...
-# ==============================================================================
 # --- SEÇÃO 2: MÓDULO DE PREVISÃO (VERSÃO COMPLETA E CORRIGIDA) ---
 # ==============================================================================
 elif pagina_selecionada == "Módulo de Previsão":
