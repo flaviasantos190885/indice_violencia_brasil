@@ -1,210 +1,183 @@
 import streamlit as st
 import pandas as pd
+import numpy as np
 import plotly.express as px
+import joblib
+from tensorflow.keras.models import load_model
+import warnings
 
-# Carrega os dados
-df = pd.read_csv("Banco_Dados_2015_2024.csv")
+# --- CONFIGURAÇÃO DA PÁGINA E AVISOS ---
+st.set_page_config(layout="wide", page_title="Análise de Violência no Brasil")
+warnings.filterwarnings("ignore", category=FutureWarning)
 
-# Adiciona colunas de Ano e Mês
-df['data_referencia'] = pd.to_datetime(df['data_referencia'])
-df['Ano'] = df['data_referencia'].dt.year
-df['Mes'] = df['data_referencia'].dt.month_name()
+# --- FUNÇÃO DE CACHE PARA CARREGAR OS ATIVOS DE PREVISÃO ---
+# @st.cache_resource garante que o modelo pesado e os arquivos sejam carregados apenas uma vez.
+@st.cache_resource
+def carregar_ativos_previsao():
+    """Carrega o modelo, o pré-processador e o normalizador salvos."""
+    try:
+        model = load_model('melhor_modelo_multivariado.keras')
+        preprocessor = joblib.load('preprocessor.joblib')
+        y_scaler = joblib.load('y_scaler.joblib')
+        return model, preprocessor, y_scaler
+    except FileNotFoundError:
+        return None, None, None
 
-# Traduz nomes dos meses
-meses_pt = {
-    'January': 'Janeiro', 'February': 'Fevereiro', 'March': 'Março', 'April': 'Abril',
-    'May': 'Maio', 'June': 'Junho', 'July': 'Julho', 'August': 'Agosto',
-    'September': 'Setembro', 'October': 'Outubro', 'November': 'Novembro', 'December': 'Dezembro'
-}
-df['Mes'] = df['Mes'].map(meses_pt)
+# --- CARREGAMENTO INICIAL DE DADOS ---
+# Carrega o dataset para o dashboard e para a lógica de previsão
+try:
+    df_completo = pd.read_csv("Dados_2015_2024.csv")
+    df_completo['data_referencia'] = pd.to_datetime(df_completo['data_referencia'])
+except FileNotFoundError:
+    st.error("Erro: O arquivo 'Dados_2015_2024.csv' não foi encontrado. Por favor, coloque-o na mesma pasta.")
+    st.stop() # Interrompe a execução se o arquivo principal não for encontrado
 
-# ---------- TÍTULO GLOBAL NO TOPO ----------
-st.markdown("<h1 style='text-align: center; font-size: 40px; color: white'>📊 Dados da Violência no Brasil</h1>", unsafe_allow_html=True)
-
-# Filtros disponíveis
-anos = sorted(df['Ano'].unique())
-todos_estados = sorted(df['uf'].unique())
-eventos = sorted(df['evento'].unique())
-
-# Filtros
-col1, col2, col3 = st.columns(3)
-
-with col1:
-    ano_selecionado = st.selectbox("Selecione o Ano", anos, key="ano")
-
-with col2:
-    estado_selecionado = st.multiselect(
-        "Selecione os Estados",
-        options=todos_estados,
-        key="estado",
-        placeholder="Todos"
+# --- BARRA LATERAL DE NAVEGAÇÃO ---
+with st.sidebar:
+    st.header("Navegação")
+    pagina_selecionada = st.radio(
+        "Escolha uma seção:",
+        ("Dashboard de Análise", "Módulo de Previsão")
     )
-
-with col3:
-    evento_input = st.selectbox("Tipo de Evento", ["Todos"] + eventos, key="evento")
-
-# Estados selecionados
-if not estado_selecionado:
-    estados_filtrados = todos_estados
-else:
-    estados_filtrados = estado_selecionado
-
-# Filtro de cidade
-if len(estados_filtrados) == 1:
-    cidades = df[df['uf'] == estados_filtrados[0]]['municipio'].sort_values().unique()
-    cidade_input = st.selectbox("Selecione a Cidade", ["Todas"] + list(cidades), index=0, key="cidade")
-else:
-    st.selectbox("Selecione a Cidade", ["Todas"], index=0, disabled=True, key="cidade_disabled")
-    cidade_input = "Todas"
-
-# Filtragem principal
-df_filtrado = df[df['Ano'] == ano_selecionado]
-df_filtrado = df_filtrado[df_filtrado['uf'].isin(estados_filtrados)]
-
-if cidade_input != "Todas":
-    df_filtrado = df_filtrado[df_filtrado['municipio'] == cidade_input]
-
-if evento_input != "Todos":
-    df_filtrado = df_filtrado[df_filtrado['evento'] == evento_input]
-
-# ---------- TÍTULO ESPECÍFICO DOS FILTROS ----------
-if evento_input == "Todos":
-    titulo = f"Casos de violência no Brasil - {ano_selecionado}"
-else:
-    titulo = f"{evento_input} - {ano_selecionado}"
-st.markdown(f"<h2 style='font-size: 36px; color: white; font-weight: bold !important;'>{titulo}</h2>", unsafe_allow_html=True)
-
-# ---------- GRÁFICO DE BARRAS ----------
-st.markdown("<h3 style='font-size: 22px; color: white;'>Total de Vítimas por Estado</h3>", unsafe_allow_html=True)
-df_barra = df_filtrado.groupby('uf')['total_vitima'].sum().reset_index()
-
-# Se só 1 estado foi selecionado, mostra o total geral no label
-if len(estados_filtrados) == 1:
-    total_estado = df_barra['total_vitima'].iloc[0]
-    df_barra['uf'] = df_barra['uf'] + f' (Total: {total_estado})'
-
-fig_barra = px.bar(
-    df_barra,
-    x='uf',
-    y='total_vitima',
-    text='total_vitima',
-    labels={'uf': 'Estado', 'total_vitima': 'Total de Vítimas'},
-    color='uf'
-)
-fig_barra.update_traces(textposition='outside')
-st.plotly_chart(fig_barra)
-
-# ---------- GRÁFICO DE LINHA (por Estado) ----------
-st.subheader("Evolução Mensal dos Casos por Estado")
-
-# Agrupa por estado e mês
-df_linha = df_filtrado.groupby(['uf', 'Mes'])['total_vitima'].sum().reset_index()
-
-# Garante a ordem correta dos meses
-ordem_meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-               'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro']
-df_linha['Mes'] = pd.Categorical(df_linha['Mes'], categories=ordem_meses, ordered=True)
-df_linha = df_linha.sort_values(['uf', 'Mes'])
-
-# Cria gráfico com uma linha por estado
-fig_linha = px.line(
-    df_linha,
-    x='Mes',
-    y='total_vitima',
-    color='uf',
-    markers=True,
-    labels={
-        'Mes': 'Mês',
-        'total_vitima': 'Total de Vítimas',
-        'uf': 'Estado'
-    }
-)
-
-fig_linha.update_traces(textposition='top center')
-st.plotly_chart(fig_linha)
-
-# ---------- GRÁFICO DE PIZZA COM FILTROS ----------
-
-st.subheader("Distribuição de Tipos de Armas por Faixa Etária")
-
-# Filtros adicionais
-col4, col5 = st.columns(2)
-
-with col4:
-    faixa_etaria_input = st.selectbox(
-        "Selecione a Faixa Etária",
-        options=["Todas"] + sorted(df_filtrado['faixa_etaria'].dropna().unique().tolist()),
-        key="faixa"
-    )
-
-with col5:
-    tipo_arma_input = st.selectbox(
-        "Selecione o Tipo de Arma",
-        options=["Todas"] + sorted(df_filtrado['arma'].dropna().unique().tolist()),
-        key="arma"
-    )
-
-# Aplica filtros de faixa etária e arma
-df_pizza = df_filtrado.copy()
-
-if faixa_etaria_input != "Todas":
-    df_pizza = df_pizza[df_pizza['faixa_etaria'] == faixa_etaria_input]
-
-if tipo_arma_input != "Todas":
-    df_pizza = df_pizza[df_pizza['arma'] == tipo_arma_input]
-
-# Agrupa dados para gráfico
-dados_pizza = df_pizza.groupby('arma').size().reset_index(name='quantidade')
-dados_pizza = dados_pizza.rename(columns={'arma': 'Tipo de Arma'})
-
-# Só gera gráfico se tiver dados
-if not dados_pizza.empty:
-    fig_pizza = px.pie(
-        dados_pizza,
-        names='Tipo de Arma',
-        values='quantidade',
-        title="Distribuição de Armas (Filtrada)",
-        hole=0.4
-    )
-    st.plotly_chart(fig_pizza)
-else:
-    st.warning("Nenhum dado disponível para os filtros selecionados.")
+    st.markdown("---")
+    st.info("Este painel oferece uma análise visual dos dados de violência e um módulo para estimativas futuras.")
 
 
-# ---------- TABELA ----------
+# ==============================================================================
+# --- SEÇÃO 1: DASHBOARD DE ANÁLISE (SEU CÓDIGO ORIGINAL) ---
+# ==============================================================================
+if pagina_selecionada == "Dashboard de Análise":
+    
+    st.markdown("<h1 style='text-align: center; color: white;'>📊 Dashboard da Violência no Brasil</h1>", unsafe_allow_html=True)
+    st.markdown("---")
 
-# Filtra as colunas que você quer mostrar, removendo as indesejadas
-colunas_para_mostrar = df_filtrado.drop(columns=['Ano']);
+    df = df_completo.copy()
+    df['Ano'] = df['data_referencia'].dt.year
+    df['Mes'] = df['data_referencia'].dt.month_name()
+    meses_pt = {'January': 'Janeiro', 'February': 'Fevereiro', 'March': 'Março', 'April': 'Abril','May': 'Maio', 'June': 'Junho', 'July': 'Julho', 'August': 'Agosto','September': 'Setembro', 'October': 'Outubro', 'November': 'Novembro', 'December': 'Dezembro'}
+    df['Mes'] = df['Mes'].map(meses_pt)
+    
+    # Seus filtros e gráficos do dashboard original...
+    anos = sorted(df['Ano'].unique())
+    todos_estados = sorted(df['uf'].unique())
+    eventos = sorted(df['evento'].unique())
+    
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        ano_selecionado = st.selectbox("Selecione o Ano", anos)
+    with col2:
+        estado_selecionado = st.multiselect("Selecione os Estados", options=todos_estados, placeholder="Todos os Estados")
+    with col3:
+        evento_input = st.selectbox("Tipo de Evento", ["Todos"] + eventos)
 
-# Filtrar apenas os dados com pelo menos uma vítima
-colunas_para_mostrar[
-    (df_filtrado['feminino'] >= 1) | 
-    (df_filtrado['masculino'] >= 1) | 
-    (df_filtrado['nao_informado'] >= 1)
-].copy()
+    if not estado_selecionado:
+        estados_filtrados = todos_estados
+    else:
+        estados_filtrados = estado_selecionado
 
-# Formatar a data antes de qualquer soma
-colunas_para_mostrar['data_referencia'] = pd.to_datetime(colunas_para_mostrar['data_referencia']).dt.strftime('%d-%m-%Y')
+    if len(estados_filtrados) == 1:
+        cidades = df[df['uf'] == estados_filtrados[0]]['municipio'].sort_values().unique()
+        cidade_input = st.selectbox("Selecione a Cidade", ["Todas"] + list(cidades), index=0)
+    else:
+        st.selectbox("Selecione a Cidade", ["Todas"], index=0, disabled=True)
+        cidade_input = "Todas"
 
-# Selecionar apenas as colunas numéricas para a filtragem por soma > 0
-colunas_numericas = colunas_para_mostrar.select_dtypes(include='number')
-colunas_validas = colunas_numericas.columns[colunas_numericas.sum() > 0]
+    df_filtrado = df[df['Ano'] == ano_selecionado]
+    df_filtrado = df_filtrado[df_filtrado['uf'].isin(estados_filtrados)]
+    if cidade_input != "Todas":
+        df_filtrado = df_filtrado[df_filtrado['municipio'] == cidade_input]
+    if evento_input != "Todos":
+        df_filtrado = df_filtrado[df_filtrado['evento'] == evento_input]
+    
+    # Seus gráficos (Barra, Linha, Pizza) e Tabela...
+    st.markdown("### Total de Vítimas por Estado")
+    df_barra = df_filtrado.groupby('uf')['total_vitima'].sum().reset_index()
+    fig_barra = px.bar(df_barra, x='uf', y='total_vitima', text_auto=True, labels={'uf': 'Estado', 'total_vitima': 'Total de Vítimas'}, color='uf')
+    st.plotly_chart(fig_barra, use_container_width=True)
 
-# Adiciona de volta as colunas não numéricas para exibir
-colunas_para_mostrar = pd.concat([
-    colunas_para_mostrar.select_dtypes(exclude='number'),
-    colunas_para_mostrar[colunas_validas]
-], axis=1)
+    st.markdown("### Evolução Mensal dos Casos por Estado")
+    df_linha = df_filtrado.groupby(['uf', 'Mes'])['total_vitima'].sum().reset_index()
+    ordem_meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho','Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro']
+    df_linha['Mes'] = pd.Categorical(df_linha['Mes'], categories=ordem_meses, ordered=True)
+    df_linha = df_linha.sort_values(['uf', 'Mes'])
+    fig_linha = px.line(df_linha,x='Mes',y='total_vitima',color='uf',markers=True,labels={'Mes': 'Mês','total_vitima': 'Total de Vítimas','uf': 'Estado'})
+    st.plotly_chart(fig_linha, use_container_width=True)
 
-# Resetar índice
-colunas_para_mostrar.reset_index(drop=True, inplace=True)
-
-# Exibir no Streamlit
-st.subheader("Dados Filtrados")
-st.dataframe(colunas_para_mostrar)
+    st.markdown("### Dados Filtrados")
+    st.dataframe(df_filtrado.drop(columns=['Ano', 'Mes']))
 
 
+# ==============================================================================
+# --- SEÇÃO 2: MÓDULO DE PREVISÃO ---
+# ==============================================================================
+elif pagina_selecionada == "Módulo de Previsão":
+    
+    st.markdown("<h1 style='text-align: center; color: white;'>🧠 Módulo de Previsão Anual</h1>", unsafe_allow_html=True)
+    st.markdown("---")
+    st.info("Use este módulo para gerar uma estimativa de vítimas para um ano futuro, com base no modelo treinado com dados históricos e em filtros opcionais.")
 
-# ---------- RODAPÉ ----------
-st.markdown("---")
-st.markdown("Desenvolvido por Flavia 💙")
+    # Carrega o modelo e os pré-processadores
+    model, preprocessor, y_scaler = carregar_ativos_previsao()
+    
+    if not model:
+        st.error("Arquivos de modelo não encontrados! Certifique-se de que 'melhor_modelo_multivariado.keras', 'preprocessor.joblib' e 'y_scaler.joblib' estão na pasta.")
+        st.stop()
+        
+    # Botão para abrir o popup (dialog) de previsão
+    if st.button("🚀 Iniciar Nova Previsão", type="primary"):
+        with st.dialog("Parâmetros da Previsão", width="large"):
+            st.markdown("#### Preencha os campos para gerar a estimativa:")
+            
+            # INPUTS DENTRO DO POPUP
+            ano_desejado = st.number_input("Digite o ANO para a previsão (Obrigatório)", min_value=df_completo['Ano'].max() + 1, value=df_completo['Ano'].max() + 1, step=1)
+            
+            col_filtros1, col_filtros2 = st.columns(2)
+            with col_filtros1:
+                uf_selecionada = st.selectbox("Filtrar por UF (Opcional)", ["Todos"] + sorted(df_completo['uf'].unique()))
+                arma_selecionada = st.selectbox("Filtrar por Arma (Opcional)", ["Todos"] + sorted(df_completo['arma'].unique()))
+            with col_filtros2:
+                evento_selecionado = st.selectbox("Filtrar por Evento (Opcional)", ["Todos"] + sorted(df_completo['evento'].unique()))
+                faixa_selecionada = st.selectbox("Filtrar por Faixa Etária (Opcional)", ["Todos"] + sorted(df_completo['faixa_etaria'].unique()))
+
+            # BOTÃO PARA CALCULAR DENTRO DO POPUP
+            if st.button("Calcular Estimativa"):
+                df_filtrado_pred = df_completo.copy()
+                
+                # Aplica filtros opcionais
+                if uf_selecionada != "Todos": df_filtrado_pred = df_filtrado_pred[df_filtrado_pred['uf'] == uf_selecionada]
+                if evento_selecionado != "Todos": df_filtrado_pred = df_filtrado_pred[df_filtrado_pred['evento'] == evento_selecionado]
+                if arma_selecionada != "Todos": df_filtrado_pred = df_filtrado_pred[df_filtrado_pred['arma'] == arma_selecionada]
+                if faixa_selecionada != "Todos": df_filtrado_pred = df_filtrado_pred[df_filtrado_pred['faixa_etaria'] == faixa_selecionada]
+
+                # Lógica de previsão (mesma do script anterior)
+                janela = 10
+                if len(df_filtrado_pred) < janela:
+                    st.error(f"Dados históricos insuficientes ({len(df_filtrado_pred)} eventos) para o cenário. Tente filtros menos específicos.")
+                else:
+                    with st.spinner("Calculando... O modelo está processando os dados."):
+                        num_anos_historico = df_filtrado_pred['Ano'].nunique()
+                        media_eventos_ano = len(df_filtrado_pred) / num_anos_historico if num_anos_historico > 0 else 0
+                        
+                        sequencia_base = df_filtrado_pred.tail(janela - 1).copy()
+                        evento_futuro_template = df_filtrado_pred.tail(1).copy()
+                        evento_futuro_template['Ano'] = ano_desejado
+                        
+                        sequencia_final_df = pd.concat([sequencia_base, evento_futuro_template], ignore_index=True)
+                        
+                        X_para_prever = sequencia_final_df.drop(columns=['total_vitima', 'data_referencia', 'municipio'])
+                        X_processado = preprocessor.transform(X_para_prever)
+                        X_final = np.reshape(X_processado, (1, X_processado.shape[0], X_processado.shape[1]))
+                        
+                        previsao_evento_normalizada = model.predict(X_final)
+                        previsao_evento_real = y_scaler.inverse_transform(previsao_evento_normalizada)
+                        vitimas_por_evento = np.ceil(previsao_evento_real[0][0])
+                        
+                        previsao_anual_total = vitimas_por_evento * media_eventos_ano
+                    
+                    st.success("Previsão Concluída!")
+                    st.metric(
+                        label=f"Estimativa de Vítimas para {ano_desejado}",
+                        value=f"{int(previsao_anual_total)}",
+                        delta_color="off"
+                    )
+                    st.caption(f"Cálculo baseado em uma previsão de {int(vitimas_por_evento)} vítimas por evento, multiplicado pela média de {media_eventos_ano:.1f} eventos/ano para o cenário escolhido.")
