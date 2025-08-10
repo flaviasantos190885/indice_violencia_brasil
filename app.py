@@ -11,6 +11,7 @@ st.set_page_config(layout="wide", page_title="Análise de Violência no Brasil")
 warnings.filterwarnings("ignore", category=FutureWarning)
 
 # --- FUNÇÃO DE CACHE PARA CARREGAR OS ATIVOS DE PREVISÃO ---
+# @st.cache_resource garante que o modelo pesado e os arquivos sejam carregados apenas uma vez.
 @st.cache_resource
 def carregar_ativos_previsao():
     """Carrega o modelo, o pré-processador e o normalizador salvos."""
@@ -23,12 +24,13 @@ def carregar_ativos_previsao():
         return None, None, None
 
 # --- CARREGAMENTO INICIAL DE DADOS ---
+# Carrega o dataset para o dashboard e para a lógica de previsão
 try:
     df_completo = pd.read_csv("Dados_2015_2024.csv")
     df_completo['data_referencia'] = pd.to_datetime(df_completo['data_referencia'], errors='coerce')
 except FileNotFoundError:
     st.error("Erro: O arquivo 'Dados_2015_2024.csv' não foi encontrado. Por favor, coloque-o na mesma pasta.")
-    st.stop()
+    st.stop() # Interrompe a execução se o arquivo principal não for encontrado
 
 # --- BARRA LATERAL DE NAVEGAÇÃO ---
 with st.sidebar:
