@@ -192,7 +192,7 @@ elif pagina_selecionada == "Módulo de Previsão":
                     value=f"{int(previsao_anual_total)}",
                     delta_color="off"
                 )
-                st.caption(f"Cálculo baseado em uma previsão de {int(vitimas_por_evento)} vítimas por evento, multiplicado pela média de {media_eventos_ano:.1f} eventos/ano para o cenário escolhido.")
+                # st.caption(f"Cálculo baseado em uma previsão de {int(vitimas_por_evento)} vítimas por evento, multiplicado pela média de {media_eventos_ano:.1f} eventos/ano para o cenário escolhido.")
         
         # Esta linha chama a função que definimos acima, fazendo o dialog aparecer
         prediction_dialog()
