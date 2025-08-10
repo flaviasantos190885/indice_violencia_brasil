@@ -131,7 +131,7 @@ if pagina_selecionada == "Dashboard de Análise":
         labels={'uf': 'Estado', 'total_vitima': 'Total de Vítimas'},
         color='uf'
     )
-    fig_barra.update_layout(bargap=0.9)
+    fig_barra.update_layout(bargap=3.0)
     st.plotly_chart(fig_barra)
 
 # ---------- GRÁFICO DE LINHA (por Estado) ----------
