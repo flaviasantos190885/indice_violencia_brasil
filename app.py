@@ -106,9 +106,8 @@ if pagina_selecionada == "Dashboard de Análise":
     st.markdown("### Dados Filtrados")
     st.dataframe(df_filtrado.drop(columns=['Ano', 'Mes']))
 
-
 # ==============================================================================
-# --- SEÇÃO 2: MÓDULO DE PREVISÃO ---
+# --- SEÇÃO 2: MÓDULO DE PREVISÃO (VERSÃO CORRIGIDA) ---
 # ==============================================================================
 elif pagina_selecionada == "Módulo de Previsão":
     
@@ -125,7 +124,16 @@ elif pagina_selecionada == "Módulo de Previsão":
         
     # Botão para abrir o popup (dialog) de previsão
     if st.button("🚀 Iniciar Nova Previsão", type="primary"):
-        with st.dialog("Parâmetros da Previsão", width="large"):
+        
+        # --- INÍCIO DA ALTERAÇÃO ---
+        # REMOVEMOS: a linha "with st.dialog(...)"
+        # ADICIONAMOS: o decorador @st.dialog e definimos uma função para conter a lógica do popup.
+        
+        @st.dialog("Parâmetros da Previsão", width="large")
+        def prediction_dialog():
+            # O restante do seu código foi movido para DENTRO desta função.
+            # A indentação foi ajustada.
+            
             st.markdown("#### Preencha os campos para gerar a estimativa:")
             
             # INPUTS DENTRO DO POPUP
@@ -164,6 +172,11 @@ elif pagina_selecionada == "Módulo de Previsão":
                         
                         sequencia_final_df = pd.concat([sequencia_base, evento_futuro_template], ignore_index=True)
                         
+                        # Garante que as colunas categóricas sejam do tipo 'category' para o pré-processador
+                        for col in X_para_prever.select_dtypes(include=['object']).columns:
+                             if col in preprocessor.feature_names_in_:
+                                X_para_prever[col] = X_para_prever[col].astype('category')
+
                         X_para_prever = sequencia_final_df.drop(columns=['total_vitima', 'data_referencia', 'municipio'])
                         X_processado = preprocessor.transform(X_para_prever)
                         X_final = np.reshape(X_processado, (1, X_processado.shape[0], X_processado.shape[1]))
@@ -173,11 +186,16 @@ elif pagina_selecionada == "Módulo de Previsão":
                         vitimas_por_evento = np.ceil(previsao_evento_real[0][0])
                         
                         previsao_anual_total = vitimas_por_evento * media_eventos_ano
-                    
-                    st.success("Previsão Concluída!")
-                    st.metric(
-                        label=f"Estimativa de Vítimas para {ano_desejado}",
-                        value=f"{int(previsao_anual_total)}",
-                        delta_color="off"
-                    )
-                    st.caption(f"Cálculo baseado em uma previsão de {int(vitimas_por_evento)} vítimas por evento, multiplicado pela média de {media_eventos_ano:.1f} eventos/ano para o cenário escolhido.")
+                
+                st.success("Previsão Concluída!")
+                st.metric(
+                    label=f"Estimativa de Vítimas para {ano_desejado}",
+                    value=f"{int(previsao_anual_total)}",
+                    delta_color="off"
+                )
+                st.caption(f"Cálculo baseado em uma previsão de {int(vitimas_por_evento)} vítimas por evento, multiplicado pela média de {media_eventos_ano:.1f} eventos/ano para o cenário escolhido.")
+
+        # ADICIONAMOS: a chamada da função que acabamos de definir para que o dialog apareça.
+        prediction_dialog()
+        
+        # --- FIM DA ALTERAÇÃO ---
