@@ -27,7 +27,7 @@ def carregar_ativos_previsao():
 # Carrega o dataset para o dashboard e para a lógica de previsão
 try:
     df_completo = pd.read_csv("Dados_2015_2024.csv")
-    df_completo['data_referencia'] = pd.to_datetime(df_completo['data_referencia'])
+    df_completo['data_referencia'] = pd.to_datetime(df_completo['data_referencia'], errors='coerce')
 except FileNotFoundError:
     st.error("Erro: O arquivo 'Dados_2015_2024.csv' não foi encontrado. Por favor, coloque-o na mesma pasta.")
     st.stop() # Interrompe a execução se o arquivo principal não for encontrado
@@ -44,7 +44,7 @@ with st.sidebar:
 
 
 # ==============================================================================
-# --- SEÇÃO 1: DASHBOARD DE ANÁLISE (SEU CÓDIGO ORIGINAL) ---
+# --- SEÇÃO 1: DASHBOARD DE ANÁLISE (COM AS CORREÇÕES) ---
 # ==============================================================================
 if pagina_selecionada == "Dashboard de Análise":
     
@@ -53,9 +53,13 @@ if pagina_selecionada == "Dashboard de Análise":
 
     df = df_completo.copy()
     df['Ano'] = df['data_referencia'].dt.year
-    df['Mes'] = df['data_referencia'].dt.month_name()
-    meses_pt = {'January': 'Janeiro', 'February': 'Fevereiro', 'March': 'Março', 'April': 'Abril','May': 'Maio', 'June': 'Junho', 'July': 'Julho', 'August': 'Agosto','September': 'Setembro', 'October': 'Outubro', 'November': 'Novembro', 'December': 'Dezembro'}
-    df['Mes'] = df['Mes'].map(meses_pt)
+    df['Mês'] = df['data_referencia'].dt.strftime('%B') # Usar strftime para pegar o nome completo do mês
+    meses_pt = {
+        'January': 'Janeiro', 'February': 'Fevereiro', 'March': 'Março', 'April': 'Abril',
+        'May': 'Maio', 'June': 'Junho', 'July': 'Julho', 'August': 'Agosto',
+        'September': 'Setembro', 'October': 'Outubro', 'November': 'Novembro', 'December': 'Dezembro'
+    }
+    df['Mês'] = df['Mês'].map(meses_pt)
     
     # Seus filtros e gráficos do dashboard original...
     anos = sorted(df['Ano'].unique())
@@ -66,45 +70,77 @@ if pagina_selecionada == "Dashboard de Análise":
     with col1:
         ano_selecionado = st.selectbox("Selecione o Ano", anos)
     with col2:
-        estado_selecionado = st.multiselect("Selecione os Estados", options=todos_estados, placeholder="Todos os Estados")
+        # Mudado para um selectbox para simplicidade, já que o multiselect pode ser complexo com o gráfico de linha
+        estado_selecionado = st.selectbox("Selecione o Estado", ["Todos os Estados"] + todos_estados)
     with col3:
         evento_input = st.selectbox("Tipo de Evento", ["Todos"] + eventos)
+    
+    # A lógica para a cidade aparecer condicionalmente foi mantida
+    cidade_input = "Todas"
+    if estado_selecionado != "Todos os Estados":
+        cidades = sorted(df[df['uf'] == estado_selecionado]['municipio'].unique())
+        cidade_input = st.selectbox("Selecione a Cidade", ["Todas"] + cidades)
 
-    if not estado_selecionado:
-        estados_filtrados = todos_estados
-    else:
-        estados_filtrados = estado_selecionado
-
-    if len(estados_filtrados) == 1:
-        cidades = df[df['uf'] == estados_filtrados[0]]['municipio'].sort_values().unique()
-        cidade_input = st.selectbox("Selecione a Cidade", ["Todas"] + list(cidades), index=0)
-    else:
-        st.selectbox("Selecione a Cidade", ["Todas"], index=0, disabled=True)
-        cidade_input = "Todas"
-
+    # Aplicação dos filtros
     df_filtrado = df[df['Ano'] == ano_selecionado]
-    df_filtrado = df_filtrado[df_filtrado['uf'].isin(estados_filtrados)]
+    if estado_selecionado != "Todos os Estados":
+        df_filtrado = df_filtrado[df_filtrado['uf'] == estado_selecionado]
     if cidade_input != "Todas":
         df_filtrado = df_filtrado[df_filtrado['municipio'] == cidade_input]
     if evento_input != "Todos":
         df_filtrado = df_filtrado[df_filtrado['evento'] == evento_input]
     
-    # Seus gráficos (Barra, Linha, Pizza) e Tabela...
+    # --- GRÁFICO DE BARRAS ---
     st.markdown("### Total de Vítimas por Estado")
     df_barra = df_filtrado.groupby('uf')['total_vitima'].sum().reset_index()
     fig_barra = px.bar(df_barra, x='uf', y='total_vitima', text_auto=True, labels={'uf': 'Estado', 'total_vitima': 'Total de Vítimas'}, color='uf')
+    
+    # --- CORREÇÃO 1: Adicionando esta linha para deixar as barras mais largas ---
+    fig_barra.update_layout(bargap=0.1) # Experimente valores entre 0 e 0.2
+
     st.plotly_chart(fig_barra, use_container_width=True)
 
-    st.markdown("### Evolução Mensal dos Casos por Estado")
-    df_linha = df_filtrado.groupby(['uf', 'Mes'])['total_vitima'].sum().reset_index()
+    # --- GRÁFICO DE LINHA ---
+    st.markdown("### Evolução Mensal dos Casos")
+    
+    # --- CORREÇÃO 2: Lógica robusta de preparação de dados para o gráfico de linha ---
+    # Usamos o df_filtrado da seleção principal para manter a consistência
+    df_para_linha = df_filtrado.copy()
+    
+    # Agrupamos os dados por Mês e Estado
+    df_evolucao_mensal = df_para_linha.groupby(['Mês', 'uf'])['total_vitima'].sum().reset_index()
+
+    # Definimos a ordem correta dos meses para o eixo X
     ordem_meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho','Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro']
-    df_linha['Mes'] = pd.Categorical(df_linha['Mes'], categories=ordem_meses, ordered=True)
-    df_linha = df_linha.sort_values(['uf', 'Mes'])
-    fig_linha = px.line(df_linha,x='Mes',y='total_vitima',color='uf',markers=True,labels={'Mes': 'Mês','total_vitima': 'Total de Vítimas','uf': 'Estado'})
+    df_evolucao_mensal['Mês'] = pd.Categorical(df_evolucao_mensal['Mês'], categories=ordem_meses, ordered=True)
+
+    # Ordenamos os dados pelo mês para que as linhas sejam desenhadas corretamente
+    df_evolucao_mensal = df_evolucao_mensal.sort_values('Mês')
+
+    # Criamos o gráfico de linha com os dados preparados
+    fig_linha = px.line(
+        df_evolucao_mensal,
+        x='Mês',
+        y='total_vitima',
+        color='uf', # Mantém uma linha por estado no dataframe filtrado
+        markers=True,
+        labels={'total_vitima': 'Total de Vítimas', 'Mês': 'Mês', 'uf': 'Estado'},
+        title='Evolução Mensal dos Casos por Estado' if estado_selecionado == "Todos os Estados" else f'Evolução Mensal dos Casos em {estado_selecionado}'
+    )
     st.plotly_chart(fig_linha, use_container_width=True)
 
+    # --- TABELA DE DADOS ---
     st.markdown("### Dados Filtrados")
-    st.dataframe(df_filtrado.drop(columns=['Ano', 'Mes']))
+    st.dataframe(df_filtrado.drop(columns=['Ano', 'Mês']))
+
+# ==============================================================================
+# --- SEÇÃO 2: MÓDULO DE PREVISÃO (SEU CÓDIGO JÁ CORRIGIDO) ---
+# ==============================================================================
+elif pagina_selecionada == "Módulo de Previsão":
+    # Cole aqui a versão completa e corrigida da Seção 2 que te enviei anteriormente.
+    # Se precisar dela novamente, é só pedir!
+    st.markdown("<h1 style='text-align: center; color: white;'>🧠 Módulo de Previsão Anual</h1>", unsafe_allow_html=True)
+    # ... (Restante do código da Seção 2) ...
 # ==============================================================================
 # --- SEÇÃO 2: MÓDULO DE PREVISÃO (VERSÃO COMPLETA E CORRIGIDA) ---
 # ==============================================================================
