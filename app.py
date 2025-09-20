@@ -412,12 +412,10 @@ elif pagina_selecionada == "Análise de Palavras":
             st.pyplot(fig)
 
         # --- GERAÇÃO DA TABELA DE FREQUÊNCIA ---
-        with st.expander(f"Ver Frequência dos Top 10 Itens em '{nome_coluna}'"):
-            # Pegamos os 10 itens mais frequentes
-            top_10_itens = frequencias.head(10)
+        with st.expander(f"Ver Frequência Completa em '{nome_coluna}'"):
             
-            # Criamos a tabela para exibição
-            df_frequencias = pd.DataFrame(top_10_itens).reset_index()
+            # Usamos a lista completa de frequências, sem limitar ao top 10
+            df_frequencias = pd.DataFrame(frequencias).reset_index()
             df_frequencias.columns = ['Item', 'Frequência']
             
             # Convertemos para porcentagem
