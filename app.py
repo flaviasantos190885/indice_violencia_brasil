@@ -367,62 +367,56 @@ elif pagina_selecionada == "Módulo de Previsão":
         st.markdown("Desenvolvido por Flavia 💙")
 
 # ==============================================================================
-# --- SEÇÃO 3: ANÁLISE DE PALAVRAS-CHAVE (VERSÃO HÍBRIDA FINAL) ---
+# --- SEÇÃO 3: ANÁLISE DE PALAVRAS-CHAVE (VERSÃO CORRIGIDA FINAL) ---
 # ==============================================================================
 elif pagina_selecionada == "Análise de Palavras-Chave":
 
-    st.markdown("<h1 style='text-align: center; color: white;'>📜 Análise de Palavras-Chave</h1>", unsafe_allow_html=True)
-    st.info("Esta seção exibe as palavras mais frequentes a partir dos dados de eventos e armas.")
+    st.markdown("<h1 style='text-align: center; color: white;'>📜 Análise de Itens</h1>", unsafe_allow_html=True)
+    st.info("Esta seção exibe a frequência dos eventos (frases completas) e das palavras mais comuns em 'armas'.")
 
-    # --- PARTE 1: ANÁLISE DE EVENTOS (USA O ARQUIVO PRÉ-CALCULADO) ---
-    st.subheader("Nuvem das Palavras Mais Frequentes em Eventos")
+    # --- PARTE 1: ANÁLISE DE EVENTOS (POR FRASE, PRÉ-CALCULADO) ---
+    st.subheader("Frequência de Tipos de Evento")
     try:
-        # Carrega o arquivo pequeno e já pronto
-        df_frequencia_evento = pd.read_csv("Frequencia_Palavras_Evento.csv")
+        # Carrega o arquivo novo e correto, com frases
+        df_frequencia_frase = pd.read_csv("Frequencia_Frases_Evento.csv")
 
-        # Gera a nuvem a partir das frequências já calculadas
-        dicionario_eventos = dict(zip(df_frequencia_evento['Palavra'], df_frequencia_evento['Contagem']))
-        if not dicionario_eventos:
+        # Gera a nuvem a partir das frequências das frases
+        dicionario_frases = dict(zip(df_frequencia_frase['Frase'], df_frequencia_frase['Contagem']))
+        if not dicionario_frases:
             st.warning("Não há dados de frequência para gerar a nuvem de palavras de eventos.")
         else:
-            wordcloud_eventos = WordCloud(width=800, height=400, background_color="black", colormap="Dark2", collocations=False).generate_from_frequencies(dicionario_eventos)
-            fig_eventos, ax_eventos = plt.subplots(figsize=(8, 4))
+            wordcloud_frases = WordCloud(width=500, height=300, background_color="black", colormap="Dark2", collocations=False).generate_from_frequencies(dicionario_frases)
+            fig_frases, ax_frases = plt.subplots(figsize=(8, 5))
             plt.style.use("dark_background")
-            ax_eventos.imshow(wordcloud_eventos, interpolation="bilinear")
-            ax_eventos.axis("off")
-            st.pyplot(fig_eventos)
+            ax_frases.imshow(wordcloud_frases, interpolation="bilinear")
+            ax_frases.axis("off")
+            st.pyplot(fig_frases)
 
-        # Exibe a tabela de frequência (APENAS PARA EVENTOS)
+        # Exibe a tabela de frequência das FRASES
         with st.expander("Ver Tabela de Frequência Completa de Eventos"):
-            df_frequencia_evento['Porcentagem'] = df_frequencia_evento['Porcentagem'].map('{:.4f}%'.format)
-            st.dataframe(df_frequencia_evento, use_container_width=True, hide_index=True)
+            df_frequencia_frase['Porcentagem'] = df_frequencia_frase['Porcentagem'].map('{:.2f}%'.format)
+            st.dataframe(df_frequencia_frase, use_container_width=True, hide_index=True)
 
     except FileNotFoundError:
-        st.error("Arquivo 'Frequencia_Palavras_Evento.csv' não encontrado. Por favor, gere-o e adicione ao repositório.")
+        st.error("Arquivo 'Frequencia_Frases_Evento.csv' não encontrado. Por favor, gere-o com o script Colab e adicione ao repositório.")
     except Exception as e:
         st.error(f"Ocorreu um erro na análise de eventos: {e}")
 
-
     st.markdown("---") # Linha divisória
 
-
-    # --- PARTE 2: ANÁLISE DE ARMAS (CALCULADA NA HORA, SEM TABELA) ---
+    # --- PARTE 2: ANÁLISE DE ARMAS (POR PALAVRA, CALCULADA NA HORA) ---
     st.subheader("Nuvem das Palavras Mais Frequentes em Armas")
     try:
-        # Usa o DataFrame 'df_completo' que foi carregado no início do app
         texto_armas = " ".join(df_completo['arma'].dropna().astype(str))
-        
         if not texto_armas.strip():
             st.warning("Não há dados na coluna 'arma' para gerar a nuvem de palavras.")
         else:
-            # Gera a nuvem de palavras diretamente do texto da coluna 'arma'
-            wordcloud_armas = WordCloud(width=800, height=400, background_color="black", colormap="viridis", collocations=False, stopwords=nlp.Defaults.stop_words).generate(texto_armas)
+            wordcloud_armas = WordCloud(width=500, height=250, background_color="black", colormap="viridis", collocations=False, stopwords=nlp.Defaults.stop_words).generate(texto_armas)
             fig_armas, ax_armas = plt.subplots(figsize=(8, 4))
             plt.style.use("dark_background")
             ax_armas.imshow(wordcloud_armas, interpolation="bilinear")
             ax_armas.axis("off")
             st.pyplot(fig_armas)
-
     except Exception as e:
         st.error(f"Ocorreu um erro ao gerar a nuvem de palavras de armas: {e}")
 
