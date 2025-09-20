@@ -5,3 +5,8 @@ numpy==2.0.2
 scikit-learn==1.6.1
 joblib==1.5.1
 tensorflow==2.19.0
+matplotlib 
+wordcloud  
+spacy      
+# Adicionado para baixar o modelo de linguagem em português:
+https://github.com/explosion/spacy-models/releases/download/pt_core_news_sm-3.7.0/pt_core_news_sm-3.7.0.tar.gz#egg=pt_core_news_sm
