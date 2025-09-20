@@ -34,7 +34,7 @@ except FileNotFoundError:
 
 # --- BARRA LATERAL DE NAVEGAÇÃO ---
 with st.sidebar:
-    st.header("Navegação")
+    st.header("Menu Interativo")
     pagina_selecionada = st.radio(
         "Escolha uma seção:",
         ("Dashboard de Análise", "Módulo de Previsão")
