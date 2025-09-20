@@ -373,7 +373,7 @@ elif pagina_selecionada == "Módulo de Previsão":
 elif pagina_selecionada == "Análise de Palavras":
 
     st.markdown("<h1 style='text-align: center; color: white;'>📜 Análise de Tipos de Evento</h1>", unsafe_allow_html=True)
-    st.info("Esta seção exibe a frequência dos eventos (frases completas) a partir do arquivo pré-calculado.")
+    st.info("Esta seção exibe a frequência dos eventos .")
 
     try:
         # Carrega o arquivo novo e correto, com as frases de evento já prontas
