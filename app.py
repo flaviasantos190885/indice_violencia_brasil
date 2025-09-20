@@ -58,7 +58,7 @@ with st.sidebar:
     st.markdown("""
     <style>
         div[role="radiogroup"] > div {
-            margin-bottom: 15px; /* Aumenta o espaço abaixo de cada item */
+            margin-bottom: 25px; /* Aumenta o espaço abaixo de cada item */
         }
     </style>
     """, unsafe_allow_html=True)
@@ -66,7 +66,7 @@ with st.sidebar:
     st.header("Menu Interativo")
     pagina_selecionada = st.radio(
         "Escolha uma seção:",
-        ("Dashboard de Análise", "Módulo de Previsão", "Análise de Palavras-Chave")
+        ("Dashboard de Análise", "Módulo de Previsão", "Análise de Palavras")
     )
     st.markdown("---")
     st.info("Este painel oferece uma análise visual dos dados de violência e um módulo para estimativas futuras.")
@@ -365,3 +365,60 @@ elif pagina_selecionada == "Módulo de Previsão":
     # Rodapé
         st.markdown("---")
         st.markdown("Desenvolvido por Flavia 💙")
+
+# ==============================================================================
+# --- SEÇÃO 3: ANÁLISE DE PALAVRAS-CHAVE ---
+# ==============================================================================
+elif pagina_selecionada == "Análise de Palavras-Chave":
+
+    # --- FUNÇÃO AUXILIAR PARA GERAR NUVEM DE PALAVRAS ---
+    def gerar_nuvem_de_palavras(dataframe, nome_coluna, titulo):
+        """
+        Gera e exibe uma nuvem de palavras para uma coluna específica de um DataFrame.
+        """
+        st.subheader(titulo)
+        
+        texto_completo = " ".join(dataframe[nome_coluna].dropna().astype(str))
+
+        if not texto_completo.strip():
+            st.warning(f"Não há dados suficientes na coluna '{nome_coluna}' para gerar a nuvem de palavras.")
+            return
+
+        with st.spinner(f"Gerando nuvem para '{nome_coluna}'..."):
+            wordcloud = WordCloud(
+                width=800,
+                height=400,
+                background_color="black",
+                colormap="Dark2",
+                stopwords=nlp.Defaults.stop_words,
+                collocations=False,
+                min_font_size=10
+            ).generate(texto_completo)
+
+            fig, ax = plt.subplots(figsize=(10, 5))
+            plt.style.use("dark_background")
+            ax.imshow(wordcloud, interpolation="bilinear")
+            ax.axis("off")
+            st.pyplot(fig)
+
+    # --- TÍTULO PRINCIPAL DA PÁGINA ---
+    st.markdown("<h1 style='text-align: center; color: white;'>📜 Análise de Palavras-Chave</h1>", unsafe_allow_html=True)
+    st.info("Esta seção exibe as palavras mais frequentes nas colunas 'evento' e 'arma' dos registros.")
+
+    try:
+        df_analise = df_completo.copy()
+        
+        # --- GERAR A NUVEM PARA A COLUNA 'EVENTO' ---
+        gerar_nuvem_de_palavras(df_analise, 'evento', 'Nuvem de Palavras por Tipo de Evento')
+        
+        st.markdown("---") # Linha divisória
+        
+        # --- GERAR A NUVEM PARA A COLUNA 'ARMA' ---
+        gerar_nuvem_de_palavras(df_analise, 'arma', 'Nuvem de Palavras por Tipo de Arma')
+
+    except Exception as e:
+        st.error(f"Ocorreu um erro inesperado ao gerar as nuvens de palavras: {e}")
+
+    # Rodapé
+    st.markdown("---")
+    st.markdown("Desenvolvido por Flavia 💙")
