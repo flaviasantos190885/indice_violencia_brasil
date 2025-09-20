@@ -401,13 +401,38 @@ elif pagina_selecionada == "Análise de Palavras":
             ).generate(texto_completo)
 
             # Para exibir no Streamlit, criamos uma figura com matplotlib
-            fig, ax = plt.subplots(figsize=(10, 5))
+            fig, ax = plt.subplots(figsize=(8, 4))
             plt.style.use("dark_background")
             ax.imshow(wordcloud, interpolation="bilinear")
             ax.axis("off")
 
             # Comando para mostrar a figura do matplotlib no Streamlit
             st.pyplot(fig)
+            
+            # --- ADICIONE ESTE BLOCO PARA MOSTRAR AS PORCENTAGENS ---
+            with st.expander("Ver Frequência das Top 10 Palavras"):
+                # A biblioteca wordcloud nos dá um dicionário com a frequência relativa de cada palavra.
+                # Vamos convertê-lo para uma lista e ordenar da maior para a menor.
+                frequencias = sorted(wordcloud.words_.items(), key=lambda x: x[1], reverse=True)
+                
+                # Pega as 10 palavras mais frequentes para exibir
+                top_10_palavras = frequencias[:10]
+                
+                if top_10_palavras:
+                    # Cria uma tabela bonita com o Pandas para mostrar os resultados
+                    df_frequencias = pd.DataFrame(top_10_palavras, columns=['Palavra', 'Frequência Relativa'])
+                    
+                    # Converte a frequência para um formato de porcentagem mais legível
+                    df_frequencias['Frequência (%)'] = (df_frequencias['Frequência Relativa'] * 100).map('{:.2f}%'.format)
+                    
+                    # Mostra a tabela na tela, escondendo colunas desnecessárias
+                    st.dataframe(
+                        df_frequencias[['Palavra', 'Frequência (%)']],
+                        use_container_width=True,
+                        hide_index=True
+                    )
+                else:
+                    st.write("Não há dados de frequência para exibir.")
 
     # --- TÍTULO PRINCIPAL DA PÁGINA ---
     st.markdown("<h1 style='text-align: center; color: white;'>📜 Análise de Palavras-Chave</h1>", unsafe_allow_html=True)
