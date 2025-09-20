@@ -391,8 +391,8 @@ elif pagina_selecionada == "Análise de Palavras":
             
             # --- MODIFICADO: Removido o parâmetro 'max_words' para incluir todas as palavras ---
             wordcloud = WordCloud(
-                width=800,
-                height=400,
+                width=500,
+                height=200,
                 background_color="black",
                 colormap="Dark2",
                 stopwords=nlp.Defaults.stop_words, # Você pode adicionar sua lista customizada aqui se precisar
