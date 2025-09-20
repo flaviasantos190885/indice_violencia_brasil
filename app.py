@@ -48,8 +48,16 @@ except FileNotFoundError:
 
 # --- BARRA LATERAL DE NAVEGAÇÃO ---
 with st.sidebar:
+    # --- CÓDIGO CSS PARA ADICIONAR ESPAÇAMENTO ---
+    st.markdown("""
+    <style>
+        div[role="radiogroup"] > div {
+            margin-bottom: 15px; /* Aumenta o espaço abaixo de cada item */
+        }
+    </style>
+    """, unsafe_allow_html=True)
+
     st.header("Menu Interativo")
-    # --- MODIFICADO: Adicionada a nova página ao menu ---
     pagina_selecionada = st.radio(
         "Escolha uma seção:",
         ("Dashboard de Análise", "Módulo de Previsão", "Análise de Sentimentos")
@@ -90,48 +98,46 @@ elif pagina_selecionada == "Análise de Sentimentos":
     st.info("Esta seção exibe uma nuvem de palavras gerada a partir dos dados textuais.")
 
     try:
-        # --- ATENÇÃO: Carregue aqui o seu DataFrame para esta análise ---
-        # Substitua 'seu_arquivo_de_sentimentos.csv' pelo nome do arquivo correto.
-        df_analise = pd.read_csv("seu_arquivo_de_sentimentos.csv")
+        # --- CORRIGIDO: Usando o seu DataFrame já carregado ---
+        df_analise = df_completo.copy()
         
-        # Verifique se a coluna necessária existe
-        if 'letra_processada' not in df_analise.columns:
-            st.error("Erro: A coluna 'letra_processada' não foi encontrada no arquivo de dados.")
+        # --- ATENÇÃO: SUBSTITUA 'evento' PELO NOME DA SUA COLUNA DE TEXTO ---
+        coluna_de_texto = 'evento' 
+        
+        if coluna_de_texto not in df_analise.columns:
+            st.error(f"Erro: A coluna '{coluna_de_texto}' não foi encontrada no arquivo de dados.")
         else:
-            # --- SEU CÓDIGO DA NUVEM DE PALAVRAS (ADAPTADO PARA STREAMLIT) ---
             st.subheader("Nuvem de Palavras Mais Frequentes")
             
             # Defina sua lista de stopwords customizadas (se tiver)
-            stoplist_custom = ["aqui", "outra", "palavra"] # Exemplo, ajuste conforme sua necessidade
+            stoplist_custom = [] # Exemplo: ["de", "a", "o"]
             
-            texto_completo = " ".join(df_analise['letra_processada'].dropna())
+            # Garante que estamos pegando apenas textos e removendo valores nulos
+            texto_completo = " ".join(df_analise[coluna_de_texto].dropna().astype(str))
 
-            with st.spinner("Gerando nuvem de palavras..."):
-                wordcloud = WordCloud(
-                    width=800,
-                    height=400,
-                    background_color="black",
-                    colormap="Dark2",
-                    stopwords=nlp.Defaults.stop_words.union(stoplist_custom),
-                    collocations=False,
-                    min_font_size=10,
-                    max_words=200
-                ).generate(texto_completo)
+            if not texto_completo.strip():
+                st.warning("Não há texto suficiente para gerar a nuvem de palavras com os filtros atuais.")
+            else:
+                with st.spinner("Gerando nuvem de palavras..."):
+                    wordcloud = WordCloud(
+                        width=800,
+                        height=400,
+                        background_color="black",
+                        colormap="Dark2",
+                        stopwords=nlp.Defaults.stop_words.union(stoplist_custom),
+                        collocations=False,
+                        min_font_size=10,
+                        max_words=200
+                    ).generate(texto_completo)
 
-                # Para exibir no Streamlit, criamos uma figura e um eixo com matplotlib
-                fig, ax = plt.subplots(figsize=(10, 5))
-                plt.style.use("dark_background") # Define o estilo do gráfico
-                ax.imshow(wordcloud, interpolation="bilinear")
-                ax.axis("off")
+                    fig, ax = plt.subplots(figsize=(10, 5))
+                    plt.style.use("dark_background")
+                    ax.imshow(wordcloud, interpolation="bilinear")
+                    ax.axis("off")
+                    st.pyplot(fig)
 
-                # Comando para mostrar a figura do matplotlib no Streamlit
-                st.pyplot(fig)
-
-    except FileNotFoundError:
-        st.warning("Para gerar a nuvem de palavras, por favor, adicione o arquivo de dados (ex: 'seu_arquivo_de_sentimentos.csv') ao seu repositório.")
-    
     except Exception as e:
-        st.error(f"Ocorreu um erro inesperado: {e}")
+        st.error(f"Ocorreu um erro inesperado ao gerar a nuvem de palavras: {e}")
 
     # Rodapé
     st.markdown("---")
