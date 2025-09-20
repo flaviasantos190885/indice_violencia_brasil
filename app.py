@@ -60,7 +60,7 @@ with st.sidebar:
     st.header("Menu Interativo")
     pagina_selecionada = st.radio(
         "Escolha uma seção:",
-        ("Dashboard de Análise", "Módulo de Previsão", "Análise de Sentimentos")
+        ("Dashboard de Análise", "Módulo de Previsão", "Análise de Palavras")
     )
     st.markdown("---")
     st.info("Este painel oferece uma análise visual dos dados de violência e um módulo para estimativas futuras.")
@@ -90,54 +90,65 @@ elif pagina_selecionada == "Módulo de Previsão":
 
 
 # ==============================================================================
-# --- SEÇÃO 3: NOVA PÁGINA - ANÁLISE DE SENTIMENTOS ---
+# --- SEÇÃO 3: NOVA PÁGINA - ANÁLISE DE PALAVRAS ---
 # ==============================================================================
-elif pagina_selecionada == "Análise de Sentimentos":
+elif pagina_selecionada == "Análise de Palavras":
 
-    st.markdown("<h1 style='text-align: center; color: white;'>📜 Análise de Sentimentos</h1>", unsafe_allow_html=True)
-    st.info("Esta seção exibe uma nuvem de palavras gerada a partir dos dados textuais.")
+    # --- FUNÇÃO AUXILIAR PARA GERAR NUVEM DE PALAVRAS ---
+    # Colocamos a lógica dentro de uma função para poder reutilizá-la facilmente
+    def gerar_nuvem_de_palavras(dataframe, nome_coluna, titulo):
+        """
+        Gera e exibe uma nuvem de palavras para uma coluna específica de um DataFrame.
+        """
+        st.subheader(titulo)
+        
+        # Garante que estamos pegando apenas textos, removendo valores nulos e convertendo para string
+        texto_completo = " ".join(dataframe[nome_coluna].dropna().astype(str))
+
+        # Verifica se há texto para processar
+        if not texto_completo.strip():
+            st.warning(f"Não há dados suficientes na coluna '{nome_coluna}' para gerar a nuvem de palavras.")
+            return # Sai da função se não houver texto
+
+        with st.spinner(f"Gerando nuvem para '{nome_coluna}'..."):
+            
+            # --- MODIFICADO: Removido o parâmetro 'max_words' para incluir todas as palavras ---
+            wordcloud = WordCloud(
+                width=800,
+                height=400,
+                background_color="black",
+                colormap="Dark2",
+                stopwords=nlp.Defaults.stop_words, # Você pode adicionar sua lista customizada aqui se precisar
+                collocations=False,
+                min_font_size=10
+            ).generate(texto_completo)
+
+            # Para exibir no Streamlit, criamos uma figura com matplotlib
+            fig, ax = plt.subplots(figsize=(10, 5))
+            plt.style.use("dark_background")
+            ax.imshow(wordcloud, interpolation="bilinear")
+            ax.axis("off")
+
+            # Comando para mostrar a figura do matplotlib no Streamlit
+            st.pyplot(fig)
+
+    # --- TÍTULO PRINCIPAL DA PÁGINA ---
+    st.markdown("<h1 style='text-align: center; color: white;'>📜 Análise de Palavras-Chave</h1>", unsafe_allow_html=True)
+    st.info("Esta seção exibe as palavras mais frequentes nas colunas 'evento' e 'arma' dos registros.")
 
     try:
-        # --- CORRIGIDO: Usando o seu DataFrame já carregado ---
         df_analise = df_completo.copy()
         
-        # --- ATENÇÃO: SUBSTITUA 'evento' PELO NOME DA SUA COLUNA DE TEXTO ---
-        coluna_de_texto = 'evento' 
+        # --- CHAMADA 1: GERAR A NUVEM PARA A COLUNA 'EVENTO' ---
+        gerar_nuvem_de_palavras(df_analise, 'evento', 'Nuvem de Palavras por Tipo de Evento')
         
-        if coluna_de_texto not in df_analise.columns:
-            st.error(f"Erro: A coluna '{coluna_de_texto}' não foi encontrada no arquivo de dados.")
-        else:
-            st.subheader("Nuvem de Palavras Mais Frequentes")
-            
-            # Defina sua lista de stopwords customizadas (se tiver)
-            stoplist_custom = [] # Exemplo: ["de", "a", "o"]
-            
-            # Garante que estamos pegando apenas textos e removendo valores nulos
-            texto_completo = " ".join(df_analise[coluna_de_texto].dropna().astype(str))
-
-            if not texto_completo.strip():
-                st.warning("Não há texto suficiente para gerar a nuvem de palavras com os filtros atuais.")
-            else:
-                with st.spinner("Gerando nuvem de palavras..."):
-                    wordcloud = WordCloud(
-                        width=800,
-                        height=400,
-                        background_color="black",
-                        colormap="Dark2",
-                        stopwords=nlp.Defaults.stop_words.union(stoplist_custom),
-                        collocations=False,
-                        min_font_size=10,
-                        max_words=200
-                    ).generate(texto_completo)
-
-                    fig, ax = plt.subplots(figsize=(10, 5))
-                    plt.style.use("dark_background")
-                    ax.imshow(wordcloud, interpolation="bilinear")
-                    ax.axis("off")
-                    st.pyplot(fig)
+        st.markdown("---") # Adiciona uma linha para separar os gráficos
+        
+        # --- CHAMADA 2: GERAR A NUVEM PARA A COLUNA 'ARMA' ---
+        gerar_nuvem_de_palavras(df_analise, 'arma', 'Nuvem de Palavras por Tipo de Arma')
 
     except Exception as e:
-        st.error(f"Ocorreu um erro inesperado ao gerar a nuvem de palavras: {e}")
+        st.error(f"Ocorreu um erro inesperado ao gerar as nuvens de palavras: {e}")
 
     # Rodapé
     st.markdown("---")
