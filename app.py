@@ -386,7 +386,7 @@ elif pagina_selecionada == "Análise de Palavras":
         if not dicionario_frases:
             st.warning("Não há dados de frequência para gerar a nuvem de palavras de eventos.")
         else:
-            wordcloud_frases = WordCloud(width=500, height=300, background_color="black", colormap="Dark2", collocations=False).generate_from_frequencies(dicionario_frases)
+            wordcloud_frases = WordCloud(width=800, height=400, background_color="black", colormap="Dark2", collocations=False).generate_from_frequencies(dicionario_frases)
             fig_frases, ax_frases = plt.subplots(figsize=(8, 5))
             plt.style.use("dark_background")
             ax_frases.imshow(wordcloud_frases, interpolation="bilinear")
