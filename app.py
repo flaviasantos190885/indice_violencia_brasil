@@ -9,6 +9,14 @@ import matplotlib.pyplot as plt
 from wordcloud import WordCloud
 import spacy
 
+# --- ADICIONADO: Carregar modelo de linguagem para stopwords ---
+try:
+    nlp = spacy.load('pt_core_news_sm')
+except OSError:
+    print("Baixando modelo de linguagem 'pt_core_news_sm'. Isso pode demorar um pouco...")
+    spacy.cli.download("pt_core_news_sm")
+    nlp = spacy.load('pt_core_news_sm')
+
 # --- CONFIGURAÇÃO DA PÁGINA E AVISOS ---
 st.set_page_config(layout="wide", page_title="Análise de Violência no Brasil")
 warnings.filterwarnings("ignore", category=FutureWarning)
