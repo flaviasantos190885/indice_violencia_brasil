@@ -368,21 +368,21 @@ elif pagina_selecionada == "Módulo de Previsão":
         st.markdown("Desenvolvido por Flavia 💙")
 
 # ==============================================================================
-# --- SEÇÃO 3: ANÁLISE DE PALAVRAS-CHAVE (VERSÃO CORRIGIDA FINAL) ---
+# --- SEÇÃO 3: ANÁLISE DE PALAVRAS ---
 # ==============================================================================
-elif pagina_selecionada == "Análise de Palavras-Chave":
+elif pagina_selecionada == "Análise de Palavras":
 
-    st.markdown("<h1 style='text-align: center; color: white;'>📜 Análise de Itens</h1>", unsafe_allow_html=True)
-    st.info("Esta seção exibe a frequência dos eventos (frases completas) e das palavras mais comuns em 'armas'.")
+    st.markdown("<h1 style='text-align: center; color: white;'>📜 Análise de Tipos de Evento</h1>", unsafe_allow_html=True)
+    st.info("Esta seção exibe a frequência dos eventos (frases completas) a partir do arquivo pré-calculado.")
 
-    # --- PARTE 1: ANÁLISE DE EVENTOS (POR FRASE, PRÉ-CALCULADO) ---
-    st.subheader("Frequência de Tipos de Evento")
     try:
-        # Carrega o arquivo novo e correto, com frases
+        # Carrega o arquivo novo e correto, com as frases de evento já prontas
         df_frequencia_frase = pd.read_csv("Frequencia_Frases_Evento.csv")
 
         # Gera a nuvem a partir das frequências das frases
+        st.subheader("Frequência de Tipos de Evento")
         dicionario_frases = dict(zip(df_frequencia_frase['Frase'], df_frequencia_frase['Contagem']))
+        
         if not dicionario_frases:
             st.warning("Não há dados de frequência para gerar a nuvem de palavras de eventos.")
         else:
@@ -399,28 +399,10 @@ elif pagina_selecionada == "Análise de Palavras-Chave":
             st.dataframe(df_frequencia_frase, use_container_width=True, hide_index=True)
 
     except FileNotFoundError:
-        st.error("Arquivo 'Frequencia_Frases_Evento.csv' não encontrado. Por favor, gere-o com o script Colab e adicione ao repositório.")
+        st.error("Arquivo 'Frequencia_Frases_Evento.csv' não encontrado. Verifique se ele está no seu repositório.")
     except Exception as e:
         st.error(f"Ocorreu um erro na análise de eventos: {e}")
 
-    st.markdown("---") # Linha divisória
-
-    # # --- PARTE 2: ANÁLISE DE ARMAS (POR PALAVRA, CALCULADA NA HORA) ---
-    # st.subheader("Nuvem das Palavras Mais Frequentes em Armas")
-    # try:
-    #     texto_armas = " ".join(df_completo['arma'].dropna().astype(str))
-    #     if not texto_armas.strip():
-    #         st.warning("Não há dados na coluna 'arma' para gerar a nuvem de palavras.")
-    #     else:
-    #         wordcloud_armas = WordCloud(width=500, height=250, background_color="black", colormap="viridis", collocations=False, stopwords=nlp.Defaults.stop_words).generate(texto_armas)
-    #         fig_armas, ax_armas = plt.subplots(figsize=(8, 4))
-    #         plt.style.use("dark_background")
-    #         ax_armas.imshow(wordcloud_armas, interpolation="bilinear")
-    #         ax_armas.axis("off")
-    #         st.pyplot(fig_armas)
-    # except Exception as e:
-    #     st.error(f"Ocorreu um erro ao gerar a nuvem de palavras de armas: {e}")
-
-    # # Rodapé
-    # st.markdown("---")
-    # st.markdown("Desenvolvido por Flavia 💙")
+    # Rodapé
+    st.markdown("---")
+    st.markdown("Desenvolvido por Flavia 💙")
