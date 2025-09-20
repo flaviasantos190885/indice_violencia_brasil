@@ -1,12 +1,12 @@
-streamlit==1.48.0
-pandas==2.2.2
-plotly==5.24.1
-numpy==2.0.2
-scikit-learn==1.6.1
-joblib==1.5.1
-tensorflow==2.19.0
-matplotlib 
-wordcloud  
-spacy      
-# Adicionado para baixar o modelo de linguagem em português:
+streamlit
+pandas
+plotly
+numpy
+scikit-learn
+joblib
+tensorflow
+matplotlib
+wordcloud
+spacy
+# A linha abaixo é a mais importante e precisa estar EXATA
 https://github.com/explosion/spacy-models/releases/download/pt_core_news_sm-3.7.0/pt_core_news_sm-3.7.0.tar.gz#egg=pt_core_news_sm
