@@ -8,6 +8,7 @@ import warnings
 import matplotlib.pyplot as plt
 from wordcloud import WordCloud
 import spacy
+import os
 
 # --- ADICIONADO: Carregar modelo de linguagem para stopwords ---
 try:
@@ -404,22 +405,22 @@ elif pagina_selecionada == "Análise de Palavras-Chave":
 
     st.markdown("---") # Linha divisória
 
-    # --- PARTE 2: ANÁLISE DE ARMAS (POR PALAVRA, CALCULADA NA HORA) ---
-    st.subheader("Nuvem das Palavras Mais Frequentes em Armas")
-    try:
-        texto_armas = " ".join(df_completo['arma'].dropna().astype(str))
-        if not texto_armas.strip():
-            st.warning("Não há dados na coluna 'arma' para gerar a nuvem de palavras.")
-        else:
-            wordcloud_armas = WordCloud(width=500, height=250, background_color="black", colormap="viridis", collocations=False, stopwords=nlp.Defaults.stop_words).generate(texto_armas)
-            fig_armas, ax_armas = plt.subplots(figsize=(8, 4))
-            plt.style.use("dark_background")
-            ax_armas.imshow(wordcloud_armas, interpolation="bilinear")
-            ax_armas.axis("off")
-            st.pyplot(fig_armas)
-    except Exception as e:
-        st.error(f"Ocorreu um erro ao gerar a nuvem de palavras de armas: {e}")
+    # # --- PARTE 2: ANÁLISE DE ARMAS (POR PALAVRA, CALCULADA NA HORA) ---
+    # st.subheader("Nuvem das Palavras Mais Frequentes em Armas")
+    # try:
+    #     texto_armas = " ".join(df_completo['arma'].dropna().astype(str))
+    #     if not texto_armas.strip():
+    #         st.warning("Não há dados na coluna 'arma' para gerar a nuvem de palavras.")
+    #     else:
+    #         wordcloud_armas = WordCloud(width=500, height=250, background_color="black", colormap="viridis", collocations=False, stopwords=nlp.Defaults.stop_words).generate(texto_armas)
+    #         fig_armas, ax_armas = plt.subplots(figsize=(8, 4))
+    #         plt.style.use("dark_background")
+    #         ax_armas.imshow(wordcloud_armas, interpolation="bilinear")
+    #         ax_armas.axis("off")
+    #         st.pyplot(fig_armas)
+    # except Exception as e:
+    #     st.error(f"Ocorreu um erro ao gerar a nuvem de palavras de armas: {e}")
 
-    # Rodapé
-    st.markdown("---")
-    st.markdown("Desenvolvido por Flavia 💙")
+    # # Rodapé
+    # st.markdown("---")
+    # st.markdown("Desenvolvido por Flavia 💙")
