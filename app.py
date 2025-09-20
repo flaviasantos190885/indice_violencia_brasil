@@ -367,38 +367,46 @@ elif pagina_selecionada == "Módulo de Previsão":
         st.markdown("Desenvolvido por Flavia 💙")
 
 # ==============================================================================
-# --- SEÇÃO 3: ANÁLISE DE PALAVRAS-CHAVE ---
+# --- SEÇÃO 3: NOVA PÁGINA - ANÁLISE DE PALAVRAS ---
 # ==============================================================================
-elif pagina_selecionada == "Análise de Palavras-Chave":
+elif pagina_selecionada == "Análise de Palavras":
 
     # --- FUNÇÃO AUXILIAR PARA GERAR NUVEM DE PALAVRAS ---
+    # Colocamos a lógica dentro de uma função para poder reutilizá-la facilmente
     def gerar_nuvem_de_palavras(dataframe, nome_coluna, titulo):
         """
         Gera e exibe uma nuvem de palavras para uma coluna específica de um DataFrame.
         """
         st.subheader(titulo)
         
+        # Garante que estamos pegando apenas textos, removendo valores nulos e convertendo para string
         texto_completo = " ".join(dataframe[nome_coluna].dropna().astype(str))
 
+        # Verifica se há texto para processar
         if not texto_completo.strip():
             st.warning(f"Não há dados suficientes na coluna '{nome_coluna}' para gerar a nuvem de palavras.")
-            return
+            return # Sai da função se não houver texto
 
         with st.spinner(f"Gerando nuvem para '{nome_coluna}'..."):
+            
+            # --- MODIFICADO: Removido o parâmetro 'max_words' para incluir todas as palavras ---
             wordcloud = WordCloud(
                 width=800,
                 height=400,
                 background_color="black",
                 colormap="Dark2",
-                stopwords=nlp.Defaults.stop_words,
+                stopwords=nlp.Defaults.stop_words, # Você pode adicionar sua lista customizada aqui se precisar
                 collocations=False,
                 min_font_size=10
             ).generate(texto_completo)
 
+            # Para exibir no Streamlit, criamos uma figura com matplotlib
             fig, ax = plt.subplots(figsize=(10, 5))
             plt.style.use("dark_background")
             ax.imshow(wordcloud, interpolation="bilinear")
             ax.axis("off")
+
+            # Comando para mostrar a figura do matplotlib no Streamlit
             st.pyplot(fig)
 
     # --- TÍTULO PRINCIPAL DA PÁGINA ---
@@ -408,12 +416,12 @@ elif pagina_selecionada == "Análise de Palavras-Chave":
     try:
         df_analise = df_completo.copy()
         
-        # --- GERAR A NUVEM PARA A COLUNA 'EVENTO' ---
+        # --- CHAMADA 1: GERAR A NUVEM PARA A COLUNA 'EVENTO' ---
         gerar_nuvem_de_palavras(df_analise, 'evento', 'Nuvem de Palavras por Tipo de Evento')
         
-        st.markdown("---") # Linha divisória
+        st.markdown("---") # Adiciona uma linha para separar os gráficos
         
-        # --- GERAR A NUVEM PARA A COLUNA 'ARMA' ---
+        # --- CHAMADA 2: GERAR A NUVEM PARA A COLUNA 'ARMA' ---
         gerar_nuvem_de_palavras(df_analise, 'arma', 'Nuvem de Palavras por Tipo de Arma')
 
     except Exception as e:
