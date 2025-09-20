@@ -367,51 +367,64 @@ elif pagina_selecionada == "Módulo de Previsão":
         st.markdown("Desenvolvido por Flavia 💙")
 
 # ==============================================================================
-# --- SEÇÃO 3: ANÁLISE DE PALAVRAS-CHAVE (VERSÃO OTIMIZADA) ---
+# --- SEÇÃO 3: ANÁLISE DE PALAVRAS-CHAVE (VERSÃO HÍBRIDA FINAL) ---
 # ==============================================================================
-elif pagina_selecionada == "Análise de Palavras":
+elif pagina_selecionada == "Análise de Palavras-Chave":
 
-    st.markdown("<h1 style='text-align: center; color: white;'>📜 Análise de Palavras de Eventos</h1>", unsafe_allow_html=True)
-    st.info("Esta seção exibe as palavras mais frequentes, pré-calculadas a partir do banco de dados completo de eventos.")
+    st.markdown("<h1 style='text-align: center; color: white;'>📜 Análise de Palavras-Chave</h1>", unsafe_allow_html=True)
+    st.info("Esta seção exibe as palavras mais frequentes a partir dos dados de eventos e armas.")
 
+    # --- PARTE 1: ANÁLISE DE EVENTOS (USA O ARQUIVO PRÉ-CALCULADO) ---
+    st.subheader("Nuvem das Palavras Mais Frequentes em Eventos")
     try:
-        # Carrega o novo arquivo, que é pequeno e já contém as frequências prontas
-        df_frequencia = pd.read_csv("Frequencia_Palavras_Evento.csv")
+        # Carrega o arquivo pequeno e já pronto
+        df_frequencia_evento = pd.read_csv("Frequencia_Palavras_Evento.csv")
 
-        # --- GERAÇÃO DA NUVEM DE PALAVRAS ---
-        st.subheader("Nuvem das Palavras Mais Frequentes em Eventos")
-        
-        # Cria um dicionário no formato {palavra: contagem} para a nuvem
-        dicionario_frequencias = dict(zip(df_frequencia['Palavra'], df_frequencia['Contagem']))
-
-        if not dicionario_frequencias:
-            st.warning("Não há dados de frequência para gerar a nuvem de palavras.")
+        # Gera a nuvem a partir das frequências já calculadas
+        dicionario_eventos = dict(zip(df_frequencia_evento['Palavra'], df_frequencia_evento['Contagem']))
+        if not dicionario_eventos:
+            st.warning("Não há dados de frequência para gerar a nuvem de palavras de eventos.")
         else:
-            wordcloud = WordCloud(
-                width=800, height=400, background_color="black",
-                colormap="Dark2", collocations=False
-            ).generate_from_frequencies(dicionario_frequencias)
-
-            fig, ax = plt.subplots(figsize=(8, 4))
+            wordcloud_eventos = WordCloud(width=800, height=400, background_color="black", colormap="Dark2", collocations=False).generate_from_frequencies(dicionario_eventos)
+            fig_eventos, ax_eventos = plt.subplots(figsize=(8, 4))
             plt.style.use("dark_background")
-            ax.imshow(wordcloud, interpolation="bilinear")
-            ax.axis("off")
-            st.pyplot(fig)
+            ax_eventos.imshow(wordcloud_eventos, interpolation="bilinear")
+            ax_eventos.axis("off")
+            st.pyplot(fig_eventos)
 
-        # --- EXIBIÇÃO DA TABELA DE FREQUÊNCIA ---
-        with st.expander("Ver Tabela de Frequência Completa"):
-            # Formata a coluna de porcentagem para melhor visualização
-            df_frequencia['Porcentagem'] = df_frequencia['Porcentagem'].map('{:.4f}%'.format)
-            st.dataframe(
-                df_frequencia,
-                use_container_width=True,
-                hide_index=True
-            )
+        # Exibe a tabela de frequência (APENAS PARA EVENTOS)
+        with st.expander("Ver Tabela de Frequência Completa de Eventos"):
+            df_frequencia_evento['Porcentagem'] = df_frequencia_evento['Porcentagem'].map('{:.4f}%'.format)
+            st.dataframe(df_frequencia_evento, use_container_width=True, hide_index=True)
 
     except FileNotFoundError:
         st.error("Arquivo 'Frequencia_Palavras_Evento.csv' não encontrado. Por favor, gere-o e adicione ao repositório.")
     except Exception as e:
-        st.error(f"Ocorreu um erro: {e}")
+        st.error(f"Ocorreu um erro na análise de eventos: {e}")
+
+
+    st.markdown("---") # Linha divisória
+
+
+    # --- PARTE 2: ANÁLISE DE ARMAS (CALCULADA NA HORA, SEM TABELA) ---
+    st.subheader("Nuvem das Palavras Mais Frequentes em Armas")
+    try:
+        # Usa o DataFrame 'df_completo' que foi carregado no início do app
+        texto_armas = " ".join(df_completo['arma'].dropna().astype(str))
+        
+        if not texto_armas.strip():
+            st.warning("Não há dados na coluna 'arma' para gerar a nuvem de palavras.")
+        else:
+            # Gera a nuvem de palavras diretamente do texto da coluna 'arma'
+            wordcloud_armas = WordCloud(width=800, height=400, background_color="black", colormap="viridis", collocations=False, stopwords=nlp.Defaults.stop_words).generate(texto_armas)
+            fig_armas, ax_armas = plt.subplots(figsize=(8, 4))
+            plt.style.use("dark_background")
+            ax_armas.imshow(wordcloud_armas, interpolation="bilinear")
+            ax_armas.axis("off")
+            st.pyplot(fig_armas)
+
+    except Exception as e:
+        st.error(f"Ocorreu um erro ao gerar a nuvem de palavras de armas: {e}")
 
     # Rodapé
     st.markdown("---")
