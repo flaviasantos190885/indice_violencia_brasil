@@ -5,6 +5,9 @@ import plotly.express as px
 import joblib
 from tensorflow.keras.models import load_model
 import warnings
+import matplotlib.pyplot as plt
+from wordcloud import WordCloud
+import spacy
 
 # --- CONFIGURAÇÃO DA PÁGINA E AVISOS ---
 st.set_page_config(layout="wide", page_title="Análise de Violência no Brasil")
