@@ -44,15 +44,32 @@ except FileNotFoundError:
     st.stop() # Interrompe a execução se o arquivo principal não for encontrado
 
 # --- BARRA LATERAL DE NAVEGAÇÃO ---
+# with st.sidebar:
+#     st.header("Navegação")
+#     pagina_selecionada = st.radio(
+#         "Escolha uma seção:",
+#         ("Dashboard de Análise", "Módulo de Previsão")
+#     )
+#     st.markdown("---")
+#     st.info("Este painel oferece uma análise visual dos dados de violência e um módulo para estimativas futuras.")
+
 with st.sidebar:
-    st.header("Navegação")
+    # --- CÓDIGO CSS PARA ADICIONAR ESPAÇAMENTO ---
+    st.markdown("""
+    <style>
+        div[role="radiogroup"] > div {
+            margin-bottom: 15px; /* Aumenta o espaço abaixo de cada item */
+        }
+    </style>
+    """, unsafe_allow_html=True)
+
+    st.header("Menu Interativo")
     pagina_selecionada = st.radio(
         "Escolha uma seção:",
-        ("Dashboard de Análise", "Módulo de Previsão")
+        ("Dashboard de Análise", "Módulo de Previsão", "Análise de Palavras-Chave")
     )
     st.markdown("---")
     st.info("Este painel oferece uma análise visual dos dados de violência e um módulo para estimativas futuras.")
-
 # ==============================================================================
 # --- SEÇÃO 1: DASHBOARD DE ANÁLISE (RESTAURADA DO ORIGINAL) ---
 # ==============================================================================
