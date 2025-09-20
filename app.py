@@ -58,7 +58,7 @@ with st.sidebar:
     st.markdown("""
     <style>
         div[role="radiogroup"] > div {
-            margin-bottom: 25px; /* Aumenta o espaço abaixo de cada item */
+            margin-bottom: 50px; /* Aumenta o espaço abaixo de cada item */
         }
     </style>
     """, unsafe_allow_html=True)
@@ -391,8 +391,8 @@ elif pagina_selecionada == "Análise de Palavras":
             
             # --- MODIFICADO: Removido o parâmetro 'max_words' para incluir todas as palavras ---
             wordcloud = WordCloud(
-                width=500,
-                height=200,
+                width=800,
+                height=400,
                 background_color="black",
                 colormap="Dark2",
                 stopwords=nlp.Defaults.stop_words, # Você pode adicionar sua lista customizada aqui se precisar
@@ -410,30 +410,33 @@ elif pagina_selecionada == "Análise de Palavras":
             st.pyplot(fig)
             
             # --- ADICIONE ESTE BLOCO PARA MOSTRAR AS PORCENTAGENS ---
-            with st.expander("Ver Frequência das Top 10 Palavras"):
-                # A biblioteca wordcloud nos dá um dicionário com a frequência relativa de cada palavra.
-                # Vamos convertê-lo para uma lista e ordenar da maior para a menor.
-                frequencias = sorted(wordcloud.words_.items(), key=lambda x: x[1], reverse=True)
+        with st.expander("Ver Frequência das Top 10 Palavras"):
+            # CÁLCULO CORRETO DE FREQUÊNCIA ABSOLUTA USANDO PANDAS
+            # 1. Quebramos o texto em uma lista de palavras
+            lista_de_palavras = texto_completo.split()
+            
+            # 2. Contamos a frequência de cada palavra e normalizamos (dividimos pelo total)
+            if lista_de_palavras:
+                frequencias = pd.Series(lista_de_palavras).value_counts(normalize=True)
                 
-                # Pega as 10 palavras mais frequentes para exibir
-                top_10_palavras = frequencias[:10]
+                # 3. Pegamos as 10 mais comuns
+                top_10_palavras = frequencias.head(10)
                 
-                if top_10_palavras:
-                    # Cria uma tabela bonita com o Pandas para mostrar os resultados
-                    df_frequencias = pd.DataFrame(top_10_palavras, columns=['Palavra', 'Frequência Relativa'])
-                    
-                    # Converte a frequência para um formato de porcentagem mais legível
-                    df_frequencias['Frequência (%)'] = (df_frequencias['Frequência Relativa'] * 100).map('{:.2f}%'.format)
-                    
-                    # Mostra a tabela na tela, escondendo colunas desnecessárias
-                    st.dataframe(
-                        df_frequencias[['Palavra', 'Frequência (%)']],
-                        use_container_width=True,
-                        hide_index=True
-                    )
-                else:
-                    st.write("Não há dados de frequência para exibir.")
+                # 4. Criamos a tabela para exibição
+                df_frequencias = pd.DataFrame(top_10_palavras).reset_index()
+                df_frequencias.columns = ['Palavra', 'Frequência']
+                
+                # 5. Convertemos para porcentagem
+                df_frequencias['Frequência (%)'] = (df_frequencias['Frequência'] * 100).map('{:.2f}%'.format)
 
+                # 6. Mostramos a tabela final
+                st.dataframe(
+                    df_frequencias[['Palavra', 'Frequência (%)']],
+                    use_container_width=True,
+                    hide_index=True
+                )
+            else:
+                st.write("Não há dados de frequência para exibir.")
     # --- TÍTULO PRINCIPAL DA PÁGINA ---
     st.markdown("<h1 style='text-align: center; color: white;'>📜 Análise de Palavras-Chave</h1>", unsafe_allow_html=True)
     st.info("Esta seção exibe as palavras mais frequentes nas colunas 'evento' e 'arma' dos registros.")
