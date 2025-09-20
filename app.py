@@ -367,43 +367,30 @@ elif pagina_selecionada == "Módulo de Previsão":
         st.markdown("Desenvolvido por Flavia 💙")
 
 # ==============================================================================
-# --- SEÇÃO 3: NOVA PÁGINA - ANÁLISE DE PALAVRAS ---
+# --- SEÇÃO 3: ANÁLISE DE PALAVRAS-CHAVE (VERSÃO OTIMIZADA) ---
 # ==============================================================================
 elif pagina_selecionada == "Análise de Palavras":
 
-    # --- FUNÇÃO AUXILIAR PARA GERAR NUVEM DE PALAVRAS ---
-    # Colocamos a lógica dentro de uma função para poder reutilizá-la facilmente
-# SUBSTITUA A SUA FUNÇÃO 'gerar_nuvem_de_palavras' INTEIRA POR ESTA:
-    def gerar_nuvem_de_palavras(dataframe, nome_coluna, titulo):
-        """
-        Gera e exibe uma nuvem de palavras e uma tabela de frequência
-        tratando cada linha da coluna como um item único (frase).
-        """
-        st.subheader(titulo)
+    st.markdown("<h1 style='text-align: center; color: white;'>📜 Análise de Palavras de Eventos</h1>", unsafe_allow_html=True)
+    st.info("Esta seção exibe as palavras mais frequentes, pré-calculadas a partir do banco de dados completo de eventos.")
 
-        # --- LÓGICA DE CÁLCULO CORRETA (POR FRASE) ---
-        # Usamos value_counts() diretamente na coluna para contar as frases inteiras.
-        # 'normalize=True' já nos dá a frequência em decimal (ex: 0.18)
-        frequencias = dataframe[nome_coluna].value_counts(normalize=True)
-
-        if frequencias.empty:
-            st.warning(f"Não há dados suficientes na coluna '{nome_coluna}' para a análise.")
-            return
+    try:
+        # Carrega o novo arquivo, que é pequeno e já contém as frequências prontas
+        df_frequencia = pd.read_csv("Frequencia_Palavras_Evento.csv")
 
         # --- GERAÇÃO DA NUVEM DE PALAVRAS ---
-        with st.spinner(f"Gerando nuvem para '{nome_coluna}'..."):
-            # A biblioteca 'wordcloud' pode gerar uma nuvem a partir de um dicionário de frequências.
-            # O formato é {frase: frequência}.
-            dicionario_frequencias = frequencias.to_dict()
-            
+        st.subheader("Nuvem das Palavras Mais Frequentes em Eventos")
+        
+        # Cria um dicionário no formato {palavra: contagem} para a nuvem
+        dicionario_frequencias = dict(zip(df_frequencia['Palavra'], df_frequencia['Contagem']))
+
+        if not dicionario_frequencias:
+            st.warning("Não há dados de frequência para gerar a nuvem de palavras.")
+        else:
             wordcloud = WordCloud(
-                width=500,
-                height=250,
-                background_color="black",
-                colormap="Dark2",
-                collocations=False, # Importante para não juntar palavras
-                min_font_size=10
-            ).generate_from_frequencies(dicionario_frequencias) # Usamos generate_from_frequencies
+                width=800, height=400, background_color="black",
+                colormap="Dark2", collocations=False
+            ).generate_from_frequencies(dicionario_frequencias)
 
             fig, ax = plt.subplots(figsize=(8, 4))
             plt.style.use("dark_background")
@@ -411,39 +398,20 @@ elif pagina_selecionada == "Análise de Palavras":
             ax.axis("off")
             st.pyplot(fig)
 
-        # --- GERAÇÃO DA TABELA DE FREQUÊNCIA ---
-        with st.expander(f"Ver Frequência Completa em '{nome_coluna}'"):
-            
-            # Usamos a lista completa de frequências, sem limitar ao top 10
-            df_frequencias = pd.DataFrame(frequencias).reset_index()
-            df_frequencias.columns = ['Item', 'Frequência']
-            
-            # Convertemos para porcentagem
-            df_frequencias['Frequência (%)'] = (df_frequencias['Frequência'] * 100).map('{:.2f}%'.format)
-
-            # Mostramos a tabela final
+        # --- EXIBIÇÃO DA TABELA DE FREQUÊNCIA ---
+        with st.expander("Ver Tabela de Frequência Completa"):
+            # Formata a coluna de porcentagem para melhor visualização
+            df_frequencia['Porcentagem'] = df_frequencia['Porcentagem'].map('{:.4f}%'.format)
             st.dataframe(
-                df_frequencias[['Item', 'Frequência (%)']],
+                df_frequencia,
                 use_container_width=True,
                 hide_index=True
             )
-    # --- TÍTULO PRINCIPAL DA PÁGINA ---
-    st.markdown("<h1 style='text-align: center; color: white;'>📜 Análise de Palavras</h1>", unsafe_allow_html=True)
-    st.info("Esta seção exibe as palavras mais frequentes nas colunas 'evento' e 'arma' dos registros.")
 
-    try:
-        df_analise = df_completo.copy()
-        
-        # --- CHAMADA 1: GERAR A NUVEM PARA A COLUNA 'EVENTO' ---
-        gerar_nuvem_de_palavras(df_analise, 'evento', 'Nuvem de Palavras por Tipo de Evento')
-        
-        st.markdown("---") # Adiciona uma linha para separar os gráficos
-        
-        # --- CHAMADA 2: GERAR A NUVEM PARA A COLUNA 'ARMA' ---
-        gerar_nuvem_de_palavras(df_analise, 'arma', 'Nuvem de Palavras por Tipo de Arma')
-
+    except FileNotFoundError:
+        st.error("Arquivo 'Frequencia_Palavras_Evento.csv' não encontrado. Por favor, gere-o e adicione ao repositório.")
     except Exception as e:
-        st.error(f"Ocorreu um erro inesperado ao gerar as nuvens de palavras: {e}")
+        st.error(f"Ocorreu um erro: {e}")
 
     # Rodapé
     st.markdown("---")
