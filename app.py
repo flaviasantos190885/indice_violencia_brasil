@@ -473,18 +473,18 @@ O módulo de previsão utiliza um modelo de **Rede Neural Recorrente (RNN)** do 
 """)
 
 # Usando st.expander para criar a seção "Saiba Mais"
-    with st.expander("Clique aqui para uma explicação detalhada sobre o modelo LSTM"):
-        st.markdown("""
-        A **Rede Neural LSTM (Long Short-Term Memory)** é um tipo avançado de Rede Neural Recorrente (RNN), projetada especificamente para aprender com sequências de dados, como séries temporais ou texto.
+with st.expander("Clique aqui para uma explicação detalhada sobre o modelo LSTM"):
+    st.markdown("""
+    A **Rede Neural LSTM (Long Short-Term Memory)** é um tipo avançado de Rede Neural Recorrente (RNN), projetada especificamente para aprender com sequências de dados, como séries temporais ou texto.
 
-        Sua principal inovação em relação às RNNs tradicionais é a sua capacidade de superar o problema da "memória curta". Ela faz isso através de uma estrutura interna chamada **célula de memória**, que funciona como uma memória de longo prazo. O fluxo de informações nesta célula é controlado por três mecanismos chamados **"gates" (portões)**:
+    Sua principal inovação em relação às RNNs tradicionais é a sua capacidade de superar o problema da "memória curta". Ela faz isso através de uma estrutura interna chamada **célula de memória**, que funciona como uma memória de longo prazo. O fluxo de informações nesta célula é controlado por três mecanismos chamados **"gates" (portões)**:
 
-        - **Portão de Esquecimento (Forget Gate):** Analisa a nova entrada de dados e decide quais informações da memória de longo prazo devem ser descartadas.
-        - **Portão de Entrada (Input Gate):** Determina quais novas informações são relevantes e devem ser armazenadas na célula de memória.
-        - **Portão de Saída (Output Gate):** Filtra a memória de longo prazo para gerar a saída ou a previsão para o passo atual da sequência.
-        
-        Essa arquitetura permite que o modelo retenha informações por longos períodos, tornando-o ideal para capturar tendências e padrões complexos nos dados históricos de criminalidade para realizar previsões futuras.
-        """)
+    - **Portão de Esquecimento (Forget Gate):** Analisa a nova entrada de dados e decide quais informações da memória de longo prazo devem ser descartadas.
+    - **Portão de Entrada (Input Gate):** Determina quais novas informações são relevantes e devem ser armazenadas na célula de memória.
+    - **Portão de Saída (Output Gate):** Filtra a memória de longo prazo para gerar a saída ou a previsão para o passo atual da sequência.
+    
+    Essa arquitetura permite que o modelo retenha informações por longos períodos, tornando-o ideal para capturar tendências e padrões complexos nos dados históricos de criminalidade para realizar previsões futuras.
+    """)
     
     col1, col2 = st.columns(2)
     with col1:
