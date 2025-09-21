@@ -96,6 +96,8 @@ if pagina_selecionada == "📊 Dashboard de Análise":
 
     # ---------- TÍTULO GLOBAL ----------
     st.markdown("<h1 style='text-align: center; font-size: 40px; color: white'>📊 Dados da Violência no Brasil</h1>", unsafe_allow_html=True)
+    
+    st.info("Este painel interativo permite a exploração detalhada dos dados de violência. Utilize os filtros de Ano, Estado e Tipo de Evento para visualizar os gráficos e a tabela com informações específicas. Dica: ao selecionar um único estado, o filtro por cidade será habilitado para uma análise ainda mais granular.")
 
     # Filtros disponíveis
     anos = sorted(df['Ano'].unique())
@@ -284,11 +286,10 @@ elif pagina_selecionada == "🧠 Módulo de Previsão":
     
     st.markdown("<h1 style='text-align: center; color: white;'>🧠 Módulo de Previsão Anual</h1>", unsafe_allow_html=True)
     st.markdown("#### Como Funciona?")
-    st.info("""
+    st.info(""
     Este módulo utiliza um modelo de Inteligência Artificial, especificamente uma **rede neural recorrente (LSTM - Long Short-Term Memory)**, para projetar estimativas futuras. O modelo foi treinado para reconhecer padrões em sequências de eventos com base nos dados históricos de 2015 a 2024. 
-    
     Para prever um resultado, ele analisa uma janela dos eventos mais recentes que correspondem ao cenário selecionado e, a partir dos padrões aprendidos, estima o número de vítimas. Esse valor é então extrapolado para gerar a estimativa para o ano completo.
-    """)
+    "")
 
     st.markdown("#### Como Usar?")
     st.write("""
