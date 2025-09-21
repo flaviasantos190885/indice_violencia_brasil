@@ -67,7 +67,7 @@ with st.sidebar:
     st.header("Menu Interativo")
     pagina_selecionada = st.radio(
         "Escolha uma seção:",
-        ("Dashboard de Análise", "Módulo de Previsão", "Análise de Palavras", "Sobre o Projeto")
+        ("Dashboard de Análise", "Módulo de Previsão", "Análise de Palavras", "Detalhes Técnicos", "Sobre o Projeto")
     )
     st.markdown("---")
     st.info("Este painel oferece uma análise visual dos dados de violência e um módulo para estimativas futuras.")
@@ -420,6 +420,71 @@ elif pagina_selecionada == "Análise de Palavras":
         st.error("Arquivo 'Frequencia_Frases_Evento.csv' não encontrado.")
     except Exception as e:
         st.error(f"Ocorreu um erro na análise de eventos: {e}")
+
+    # Rodapé
+    st.markdown("---")
+    st.markdown("Desenvolvido por Flavia 💙")
+    
+    # ==============================================================================
+# --- SEÇÃO 4: DETALHES TÉCNICOS DO PROJETO ---
+# ==============================================================================
+elif pagina_selecionada == "Detalhes Técnicos":
+
+    st.markdown("<h1 style='text-align: center; color: white;'>⚙️ Detalhes Técnicos do Projeto</h1>", unsafe_allow_html=True)
+    st.info("Esta seção descreve a arquitetura, as tecnologias e a metodologia utilizadas para o desenvolvimento desta ferramenta de análise e previsão.")
+
+    st.markdown("---")
+
+    # --- SEÇÃO DE TECNOLOGIAS ---
+    st.subheader("Tecnologias e Linguagens Utilizadas")
+    st.markdown("""
+    A ferramenta foi desenvolvida inteiramente na linguagem **Python**, utilizando um conjunto de bibliotecas especializadas para cada etapa do projeto:
+
+    - **Interface Web e Dashboard:**
+        - **Streamlit:** Framework principal para a criação da interface web interativa.
+    
+    - **Manipulação e Análise de Dados:**
+        - **Pandas:** Para carregamento, limpeza e manipulação dos dados tabulares.
+        - **NumPy:** Para operações numéricas e suporte a estruturas de dados multidimensionais.
+
+    - **Visualização de Dados:**
+        - **Plotly Express:** Para a criação dos gráficos interativos do dashboard (barras, linhas, pizza).
+        - **Matplotlib & WordCloud:** Para a geração das nuvens de palavras na análise de frequência.
+
+    - **Machine Learning e Modelagem Preditiva:**
+        - **TensorFlow (Keras):** Framework utilizado para construir, treinar e salvar o modelo de rede neural.
+        - **Scikit-learn:** Para pré-processamento dos dados (codificação de variáveis categóricas e normalização) antes do treinamento do modelo.
+        - **Joblib:** Para salvar e carregar os objetos de pré-processamento.
+    """)
+
+    st.markdown("---")
+
+    # --- SEÇÃO DO MODELO DE PREVISÃO ---
+    st.subheader("Modelo de Previsão: Rede Neural LSTM")
+    st.write("""
+    O módulo de previsão utiliza um modelo de **Rede Neural Recorrente (RNN)** do tipo **LSTM (Long Short-Term Memory)**. Este tipo de arquitetura é especialmente eficaz para analisar sequências e dados de séries temporais, pois consegue "lembrar" de informações de passos anteriores para prever valores futuros.
+    """)
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("##### Pré-Processamento dos Dados")
+        st.markdown("""
+        Antes de alimentar o modelo, os dados passam por um rigoroso pré-processamento:
+        1.  **Codificação Categórica:** Variáveis textuais como 'UF', 'evento' e 'arma' são transformadas em representações numéricas usando a técnica de *One-Hot Encoding*.
+        2.  **Normalização:** Todas as features numéricas são escalonadas para um intervalo entre 0 e 1, garantindo que nenhuma variável domine o processo de aprendizado.
+        3.  **Criação de Janelas:** Os dados são organizados em "janelas" sequenciais, onde o modelo aprende a prever o `total_vitima` de um evento com base nos dados dos 10 eventos anteriores.
+        """)
+
+    with col2:
+        st.markdown("##### Arquitetura e Treinamento")
+        st.markdown("""
+        O modelo foi construído com a API Keras do TensorFlow e salvo no arquivo `melhor_modelo_multivariado.keras`.
+        - **Estrutura:** A rede é composta por camadas LSTM seguidas de camadas `Dense` para processar a sequência e gerar a previsão final.
+        - **Otimizador:** Foi utilizado o otimizador `Adam`, que é eficiente e amplamente adotado para treinar redes neurais.
+        - **Função de Perda:** O modelo foi treinado para minimizar o **Erro Quadrático Médio (Mean Squared Error)**, uma métrica padrão para problemas de regressão.
+        - **Validação:** Os dados foram divididos em conjuntos de treino e teste para garantir que o modelo fosse capaz de generalizar e fazer previsões precisas em dados não vistos durante o treinamento.
+        """)
 
     # Rodapé
     st.markdown("---")
