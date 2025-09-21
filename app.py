@@ -56,27 +56,15 @@ except FileNotFoundError:
 #     st.info("Este painel oferece uma análise visual dos dados de violência e um módulo para estimativas futuras.")
 
 with st.sidebar:
-    # --- CÓDIGO CSS PARA ADICIONAR ESPAÇAMENTO ---
-    st.markdown("""
-    <style>
-        div[role="radiogroup"] > div {
-            margin-bottom: 1500px; /* Aumenta o espaço abaixo de cada item */
-        }
-    </style>
-    """, unsafe_allow_html=True)
-    
-with st.sidebar:
-
     st.header("Menu Interativo")
-    
+
     # --- CSS para ajustar tamanho e tirar a linha azul ---
     st.markdown("""
     <style>
     /* Reduz o tamanho dos emojis/ícones no menu */
     div[role="radiogroup"] label span {
-        font-size: 18px !important;  /* antes estava muito grande */
+        font-size: 18px !important;
     }
-
     /* Remove sublinhado/linha azul */
     div[role="radiogroup"] label a {
         text-decoration: none !important;
@@ -104,13 +92,6 @@ with st.sidebar:
         "pelo IF Sudeste MG - Campus Muriaé."
     )
 
-    st.markdown("---")
-    st.info(
-        "Este painel oferece uma análise visual dos dados de violência e um módulo para estimativas futuras.   "
-        
-        "O projeto representa o Trabalho de Conclusão de Curso (TCC) em Gestão da Tecnologia da Informação (GTI) "
-        "pelo IF Sudeste MG - Campus Muriaé."
-    )
 # ==============================================================================
 # --- SEÇÃO 1: DASHBOARD DE ANÁLISE (RESTAURADA DO ORIGINAL) ---
 # ==============================================================================
