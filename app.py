@@ -10,6 +10,36 @@ from wordcloud import WordCloud
 import spacy
 import os
 
+if 'pagina_selecionada' not in st.session_state:
+    st.session_state.pagina_selecionada = "📊 Dashboard de Análise"
+
+# --- FUNÇÃO PARA O MENU HORIZONTAL ---
+def menu_horizontal():
+    colunas = st.columns(6)
+    with colunas[0]:
+        st.link_button("🏠 Home", "https://dados-violencia-brasil-2015-a-2024.streamlit.app/", use_container_width=True)
+    with colunas[1]:
+        if st.button("📊 Dashboard", use_container_width=True):
+            st.session_state.pagina_selecionada = "📊 Dashboard de Análise"
+            st.rerun()
+    with colunas[2]:
+        if st.button("🧠 Previsão", use_container_width=True):
+            st.session_state.pagina_selecionada = "🧠 Módulo de Previsão"
+            st.rerun()
+    with colunas[3]:
+        if st.button("📜 Análise", use_container_width=True):
+            st.session_state.pagina_selecionada = "📜 Análise de Palavras"
+            st.rerun()
+    with colunas[4]:
+        if st.button("⚙️ Detalhes", use_container_width=True):
+            st.session_state.pagina_selecionada = "⚙️ Detalhes Técnicos"
+            st.rerun()
+    with colunas[5]:
+        if st.button("ℹ️ Sobre", use_container_width=True):
+            st.session_state.pagina_selecionada = "ℹ️ Sobre o Projeto"
+            st.rerun()
+    st.markdown("<hr>", unsafe_allow_html=True)
+
 
 # --- ADICIONADO: Carregar modelo de linguagem para stopwords ---
 try:
@@ -66,15 +96,10 @@ with st.sidebar:
     """, unsafe_allow_html=True)
 
     st.header("Menu Interativo")
-    pagina_selecionada = st.radio(
+    st.radio(
     "Escolha uma seção:",
-    (
-        "📊 Dashboard de Análise",
-        "🧠 Módulo de Previsão",
-        "📜 Análise de Palavras",
-        "⚙️ Detalhes Técnicos",
-        "ℹ️ Sobre o Projeto"
-    )
+    ("📊 Dashboard de Análise", "🧠 Módulo de Previsão", "📜 Análise de Palavras", "⚙️ Detalhes Técnicos", "ℹ️ Sobre o Projeto"),
+    key="pagina_selecionada"
 )
     st.markdown("---")
     st.info(
@@ -86,7 +111,7 @@ with st.sidebar:
 # ==============================================================================
 # --- SEÇÃO 1: DASHBOARD DE ANÁLISE (RESTAURADA DO ORIGINAL) ---
 # ==============================================================================
-if pagina_selecionada == "📊 Dashboard de Análise":
+if st.session_state.pagina_selecionada == "📊 Dashboard de Análise":
 
     df = df_completo.copy()
     df['Ano'] = df['data_referencia'].dt.year
@@ -288,7 +313,7 @@ if pagina_selecionada == "📊 Dashboard de Análise":
 # ==============================================================================
 # --- SEÇÃO 2: MÓDULO DE PREVISÃO (VERSÃO COMPLETA E CORRIGIDA) ---
 # ==============================================================================
-elif pagina_selecionada == "🧠 Módulo de Previsão":
+elif st.session_state.pagina_selecionada == "🧠 Módulo de Previsão":
     
     st.markdown("<h1 style='text-align: center; color: white;'>🧠 Módulo de Previsão Anual</h1>", unsafe_allow_html=True)
     st.markdown("#### Como Funciona?")
@@ -395,7 +420,7 @@ elif pagina_selecionada == "🧠 Módulo de Previsão":
 # ==============================================================================
 # --- SEÇÃO 3: ANÁLISE DE PALAVRAS (VERSÃO COM CONTROLE FINO) ---
 # ==============================================================================
-elif pagina_selecionada == "📜 Análise de Palavras":
+elif st.session_state.pagina_selecionada == "📜 Análise de Palavras":
 
     st.markdown("<h1 style='text-align: center; color: white;'>📜 Análise de Tipos de Evento</h1>", unsafe_allow_html=True)
     st.info("Frequência dos eventos exibidas em Nuvem de Palavras e através de uma tabela de percentual de cada evento.")
@@ -453,7 +478,7 @@ elif pagina_selecionada == "📜 Análise de Palavras":
     # ==============================================================================
 # --- SEÇÃO 4: DETALHES TÉCNICOS DO PROJETO (VERSÃO FINAL) ---
 # ==============================================================================
-elif pagina_selecionada == "⚙️ Detalhes Técnicos":
+elif st.session_state.pagina_selecionada == "⚙️ Detalhes Técnicos":
 
     st.markdown("<h1 style='text-align: center; color: white;'>⚙️ Detalhes Técnicos do Projeto</h1>", unsafe_allow_html=True)
     st.info("Arquitetura, tecnologias e a metodologia utilizadas para o desenvolvimento desta ferramenta de análise e previsão.")
@@ -543,7 +568,7 @@ elif pagina_selecionada == "⚙️ Detalhes Técnicos":
 # ==============================================================================
 # --- SEÇÃO 5: SOBRE O PROJETO ---
 # ==============================================================================
-elif pagina_selecionada == "ℹ️ Sobre o Projeto":
+elif st.session_state.pagina_selecionada == "ℹ️ Sobre o Projeto":
 
     st.markdown("<h1 style='text-align: center; color: white;'>ℹ️ Sobre o Projeto e a Fonte dos Dados</h1>", unsafe_allow_html=True)
     st.info("Este painel foi desenvolvido para visualizar e analisar os dados abertos sobre segurança pública no Brasil, com o objetivo de promover a transparência e facilitar o entendimento sobre o tema.")
