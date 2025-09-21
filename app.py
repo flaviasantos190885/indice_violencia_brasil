@@ -368,7 +368,7 @@ elif pagina_selecionada == "Módulo de Previsão":
         st.markdown("Desenvolvido por Flavia 💙")
 
 # ==============================================================================
-# --- SEÇÃO 3: ANÁLISE DE PALAVRAS (VERSÃO COM GRADIENTE CORRIGIDO) ---
+# --- SEÇÃO 3: ANÁLISE DE PALAVRAS (VERSÃO COM CONTROLE FINO) ---
 # ==============================================================================
 elif pagina_selecionada == "Análise de Palavras":
 
@@ -377,53 +377,41 @@ elif pagina_selecionada == "Análise de Palavras":
 
     try:
         df_frequencia_frase = pd.read_csv("Frequencia_Frases_Evento.csv")
+
         st.subheader("Frequência de Tipos de Evento")
         
-        dicionario_frases = dict(zip(df_frequencia_frase['Frase'], df_frequencia_frase['Contagem']))
+        # --- MUDANÇA 1: CONTROLE FINO DO TAMANHO DAS FRASES ---
+        # Criei um "fator de escala" para controlar a diferença de tamanho.
+        # 1.0 = diferença máxima (original)
+        # 0.5 = raiz quadrada (diferença média) <-- BOM PONTO DE PARTIDA
+        # < 0.5 = diferenças cada vez menores
+        fator_de_escala = 0.5 
         
-        if not dicionario_frases:
+        dicionario_frases_escalonado = dict(zip(
+            df_frequencia_frase['Frase'], 
+            df_frequencia_frase['Contagem'] ** fator_de_escala
+        ))
+        
+        if not dicionario_frases_escalonado:
             st.warning("Não há dados de frequência para gerar a nuvem de palavras de eventos.")
         else:
-            # --- FUNÇÃO DE COR PERSONALIZADA (VERSÃO CORRIGIDA) ---
-            # Definimos os valores máximo e mínimo de frequência ANTES da função
-            max_freq = float(max(dicionario_frases.values()))
-            min_freq = float(min(dicionario_frases.values()))
-
-            def cor_gradiente_final(word, font_size, position, orientation, random_state=None, **kwargs):
-                # Pega a contagem da palavra atual do dicionário
-                freq_atual = float(dicionario_frases.get(word, 0))
-                
-                # Normaliza a frequência (um valor de 0 a 1)
-                if max_freq == min_freq:
-                    normalized_freq = 0.5
-                else:
-                    normalized_freq = (freq_atual - min_freq) / (max_freq - min_freq)
-                
-                # Mapeia a frequência para um tom (Hue) entre 0 (vermelho) e 55 (amarelo)
-                # Onde 1.0 (mais frequente) = Hue 0
-                # Onde 0.0 (menos frequente) = Hue 55
-                hue = int(55 * (1 - normalized_freq))
-                
-                return f"hsl({hue}, 100%, 50%)"
-            
-            # --- FIM DA FUNÇÃO ---
-
             wordcloud_frases = WordCloud(
-                width=400, height=250, background_color="black",
-                collocations=False,
-                # Usamos a nova função de cor aqui:
-                color_func=cor_gradiente_final
-            ).generate_from_frequencies(dicionario_frases)
+                width=800, height=400, background_color="black", 
+                colormap="hot", collocations=False
+            ).generate_from_frequencies(dicionario_frases_escalonado)
 
             fig_frases, ax_frases = plt.subplots(figsize=(7, 5))
             plt.style.use("dark_background")
             ax_frases.imshow(wordcloud_frases, interpolation="bilinear")
             ax_frases.axis("off")
 
+            # --- MUDANÇA 2: CONTROLE PRECISO DO TAMANHO DO QUADRO ---
+            # Usamos colunas para criar "margens" e forçar o gráfico a ficar menor no centro
             col1, col2, col3 = st.columns([1, 6, 1])
             with col2:
                 st.pyplot(fig_frases)
 
+        # A tabela de frequência continua a mesma, mostrando os números reais
         with st.expander("Ver Tabela de Frequência Completa de Eventos"):
             df_frequencia_frase['Porcentagem'] = df_frequencia_frase['Porcentagem'].map('{:.2f}%'.format)
             st.dataframe(df_frequencia_frase, use_container_width=True, hide_index=True)
