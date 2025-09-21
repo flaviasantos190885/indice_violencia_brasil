@@ -59,7 +59,7 @@ with st.sidebar:
     st.markdown("""
     <style>
         div[role="radiogroup"] > div {
-            margin-bottom: 150px; /* Aumenta o espaço abaixo de cada item */
+            margin-bottom: 1500px; /* Aumenta o espaço abaixo de cada item */
         }
     </style>
     """, unsafe_allow_html=True)
