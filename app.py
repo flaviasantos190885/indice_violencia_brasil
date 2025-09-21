@@ -64,21 +64,33 @@ with st.sidebar:
     </style>
     """, unsafe_allow_html=True)
     
-        # --- EMOJIS DE NAVEGAÇÃO (ICONS) ---
-    st.markdown(
-        """
-        <div style="text-align: center; font-size: 28px;">
-            <a href="https://dados-violencia-brasil-2015-a-2024.streamlit.app/" target="_self" title="Home">🏠</a> &nbsp;
-            <a href="#dashboard-de-análise" title="Dashboard de Análise">📊</a> &nbsp;
-            <a href="#módulo-de-previsão" title="Módulo de Previsão">🧠</a> &nbsp;
-            <a href="#análise-de-palavras" title="Análise de Palavras">📜</a> &nbsp;
-            <a href="#detalhes-técnicos" title="Detalhes Técnicos">⚙️</a> &nbsp;
-            <a href="#sobre-o-projeto" title="Sobre o Projeto">ℹ️</a>
-        </div>
-        <br>
-        """,
-        unsafe_allow_html=True
-    )
+    # --- EMOJIS DE NAVEGAÇÃO (ICONS) ---
+st.markdown(
+    """
+    <style>
+        .nav-icons a {
+            text-decoration: none;  /* remove linha azul */
+            font-size: 22px;        /* tamanho menor dos emojis */
+            margin: 0 6px;          /* espaço entre os ícones */
+        }
+    </style>
+    <div class="nav-icons" style="text-align: center;">
+        <a href="/?menu=Home" title="Home">🏠</a>
+        <a href="/?menu=Dashboard de Análise" title="Dashboard de Análise">📊</a>
+        <a href="/?menu=Módulo de Previsão" title="Módulo de Previsão">🧠</a>
+        <a href="/?menu=Análise de Palavras" title="Análise de Palavras">📜</a>
+        <a href="/?menu=Detalhes Técnicos" title="Detalhes Técnicos">⚙️</a>
+        <a href="/?menu=Sobre o Projeto" title="Sobre o Projeto">ℹ️</a>
+    </div>
+    <br>
+    """,
+    unsafe_allow_html=True
+)
+
+# --- Sincronizar links com o menu do sidebar ---
+query_params = st.experimental_get_query_params()
+if "menu" in query_params:
+    st.session_state["menu"] = query_params["menu"][0]
 
 
     st.header("Menu Interativo")
