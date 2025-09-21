@@ -65,7 +65,7 @@ with st.sidebar:
     </style>
     """, unsafe_allow_html=True)
 
-    st.header("Menu Interativo")
+    st.header("Menu Interativo teste")
     pagina_selecionada = st.radio(
     "Escolha uma seção:",
     (
