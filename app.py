@@ -280,7 +280,7 @@ if pagina_selecionada == "📊 Dashboard de Análise":
 # ==============================================================================
 # --- SEÇÃO 2: MÓDULO DE PREVISÃO (VERSÃO COMPLETA E CORRIGIDA) ---
 # ==============================================================================
-elif pagina_selecionada == "Módulo de Previsão":
+elif pagina_selecionada == "🧠 Módulo de Previsão":
     
     st.markdown("<h1 style='text-align: center; color: white;'>🧠 Módulo de Previsão Anual</h1>", unsafe_allow_html=True)
     st.markdown("---")
@@ -376,7 +376,7 @@ elif pagina_selecionada == "Módulo de Previsão":
 # ==============================================================================
 # --- SEÇÃO 3: ANÁLISE DE PALAVRAS (VERSÃO COM CONTROLE FINO) ---
 # ==============================================================================
-elif pagina_selecionada == "Análise de Palavras":
+elif pagina_selecionada == "📜 Análise de Palavras":
 
     st.markdown("<h1 style='text-align: center; color: white;'>📜 Análise de Tipos de Evento</h1>", unsafe_allow_html=True)
     st.info("Esta seção exibe a frequência dos eventos.")
@@ -434,7 +434,7 @@ elif pagina_selecionada == "Análise de Palavras":
     # ==============================================================================
 # --- SEÇÃO 4: DETALHES TÉCNICOS DO PROJETO (VERSÃO FINAL) ---
 # ==============================================================================
-elif pagina_selecionada == "Detalhes Técnicos":
+elif pagina_selecionada == "⚙️ Detalhes Técnicos":
 
     st.markdown("<h1 style='text-align: center; color: white;'>⚙️ Detalhes Técnicos do Projeto</h1>", unsafe_allow_html=True)
     st.info("Esta seção descreve a arquitetura, as tecnologias e a metodologia utilizadas para o desenvolvimento desta ferramenta de análise e previsão.")
@@ -511,7 +511,7 @@ elif pagina_selecionada == "Detalhes Técnicos":
 # ==============================================================================
 # --- SEÇÃO 5: SOBRE O PROJETO ---
 # ==============================================================================
-elif pagina_selecionada == "Sobre o Projeto":
+elif pagina_selecionada == "ℹ️ Sobre o Projeto":
 
     st.markdown("<h1 style='text-align: center; color: white;'>ℹ️ Sobre o Projeto e a Fonte dos Dados</h1>", unsafe_allow_html=True)
     st.info("Este painel foi desenvolvido para visualizar e analisar os dados abertos sobre segurança pública no Brasil, com o objetivo de promover a transparência e facilitar o entendimento sobre o tema.")
