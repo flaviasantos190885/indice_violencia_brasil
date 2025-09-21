@@ -368,34 +368,9 @@ elif pagina_selecionada == "Módulo de Previsão":
         st.markdown("Desenvolvido por Flavia 💙")
 
 # ==============================================================================
-# --- SEÇÃO 3: ANÁLISE DE PALAVRAS (VERSÃO COM GRADIENTE CORRETO) ---
+# --- SEÇÃO 3: ANÁLISE DE PALAVRAS (VERSÃO COM GRADIENTE CORRIGIDO) ---
 # ==============================================================================
 elif pagina_selecionada == "Análise de Palavras":
-
-    # --- FUNÇÃO DE CORES PERSONALIZADA (VERMELHO -> AMARELO) ---
-    def cor_gradiente_vermelho_amarelo(word, font_size, position, orientation, random_state=None, **kwargs):
-        """
-        Cria um gradiente de cor baseado na frequência da palavra.
-        Usa o modelo de cor HSL (Hue, Saturation, Lightness).
-        - Hue 0 = Vermelho
-        - Hue 60 = Amarelo
-        A função mapeia a frequência da palavra para um tom entre vermelho e amarelo.
-        """
-        # Pega a frequência máxima do dicionário para normalizar
-        max_freq = max(list(kwargs['frequencies'].values()))
-        # Pega a frequência da palavra atual
-        current_freq = kwargs['frequencies'][word]
-        
-        # Normaliza a frequência (um valor entre 0 e 1)
-        normalized_freq = current_freq / max_freq
-        
-        # Mapeia a frequência para um tom (Hue) entre 0 (vermelho) e 55 (amarelo/laranja)
-        # Quanto maior a frequência, mais perto de 0 (vermelho)
-        hue = int(55 * (1 - normalized_freq))
-        
-        # Retorna a cor no formato HSL que a biblioteca entende
-        return f"hsl({hue}, 100%, 50%)"
-
 
     st.markdown("<h1 style='text-align: center; color: white;'>📜 Análise de Tipos de Evento</h1>", unsafe_allow_html=True)
     st.info("Esta seção exibe a frequência dos eventos.")
@@ -409,11 +384,35 @@ elif pagina_selecionada == "Análise de Palavras":
         if not dicionario_frases:
             st.warning("Não há dados de frequência para gerar a nuvem de palavras de eventos.")
         else:
+            # --- FUNÇÃO DE COR PERSONALIZADA (VERSÃO CORRIGIDA) ---
+            # Definimos os valores máximo e mínimo de frequência ANTES da função
+            max_freq = float(max(dicionario_frases.values()))
+            min_freq = float(min(dicionario_frases.values()))
+
+            def cor_gradiente_final(word, font_size, position, orientation, random_state=None, **kwargs):
+                # Pega a contagem da palavra atual do dicionário
+                freq_atual = float(dicionario_frases.get(word, 0))
+                
+                # Normaliza a frequência (um valor de 0 a 1)
+                if max_freq == min_freq:
+                    normalized_freq = 0.5
+                else:
+                    normalized_freq = (freq_atual - min_freq) / (max_freq - min_freq)
+                
+                # Mapeia a frequência para um tom (Hue) entre 0 (vermelho) e 55 (amarelo)
+                # Onde 1.0 (mais frequente) = Hue 0
+                # Onde 0.0 (menos frequente) = Hue 55
+                hue = int(55 * (1 - normalized_freq))
+                
+                return f"hsl({hue}, 100%, 50%)"
+            
+            # --- FIM DA FUNÇÃO ---
+
             wordcloud_frases = WordCloud(
-                width=800, height=400, background_color="black",
-                # --- MUDANÇA PRINCIPAL: Usando a função de cor personalizada ---
-                color_func=cor_gradiente_vermelho_amarelo, # Substitui o 'colormap'
-                collocations=False
+                width=400, height=250, background_color="black",
+                collocations=False,
+                # Usamos a nova função de cor aqui:
+                color_func=cor_gradiente_final
             ).generate_from_frequencies(dicionario_frases)
 
             fig_frases, ax_frases = plt.subplots(figsize=(7, 5))
