@@ -283,8 +283,20 @@ if pagina_selecionada == "📊 Dashboard de Análise":
 elif pagina_selecionada == "🧠 Módulo de Previsão":
     
     st.markdown("<h1 style='text-align: center; color: white;'>🧠 Módulo de Previsão Anual</h1>", unsafe_allow_html=True)
-    st.markdown("---")
-    st.info("Use este módulo para gerar uma estimativa de vítimas para um ano futuro, com base no modelo treinado com dados históricos e em filtros opcionais.")
+    st.markdown("#### Como Funciona?")
+    st.info("""
+    Este módulo utiliza um modelo de Inteligência Artificial, especificamente uma **rede neural recorrente (LSTM - Long Short-Term Memory)**, para projetar estimativas futuras. O modelo foi treinado para reconhecer padrões em sequências de eventos com base nos dados históricos de 2015 a 2024. 
+    
+    Para prever um resultado, ele analisa uma janela dos eventos mais recentes que correspondem ao cenário selecionado e, a partir dos padrões aprendidos, estima o número de vítimas. Esse valor é então extrapolado para gerar a estimativa para o ano completo.
+    """)
+
+    st.markdown("#### Como Usar?")
+    st.write("""
+    1.  **Clique no botão '🚀 Iniciar Nova Previsão'** para abrir o painel de parâmetros.
+    2.  No campo **'Digite o ANO para a previsão'**, insira o ano futuro que deseja estimar.
+    3.  Utilize os **filtros opcionais** (UF, Evento, Arma, Faixa Etária) para refinar o cenário da sua previsão. Deixar em "Todos" gera uma estimativa mais geral.
+    4.  Clique em **'Calcular Estimativa'** e aguarde o modelo processar os dados.
+    """)
 
     # Carrega o modelo e os pré-processadores
     model, preprocessor, y_scaler = carregar_ativos_previsao()
