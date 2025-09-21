@@ -10,6 +10,7 @@ from wordcloud import WordCloud
 import spacy
 import os
 
+
 # --- ADICIONADO: Carregar modelo de linguagem para stopwords ---
 try:
     nlp = spacy.load('pt_core_news_sm')
@@ -77,7 +78,8 @@ with st.sidebar:
 )
     st.markdown("---")
     st.info(
-        "Este painel oferece uma análise visual dos dados de violência e um módulo para estimativas futuras. "
+        "Este painel oferece uma análise visual dos dados de violência e um módulo para estimativas futuras.   "
+        
         "O projeto representa o Trabalho de Conclusão de Curso (TCC) em Gestão da Tecnologia da Informação (GTI) "
         "pelo IF Sudeste MG - Campus Muriaé."
     )
