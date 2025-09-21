@@ -368,50 +368,63 @@ elif pagina_selecionada == "Módulo de Previsão":
         st.markdown("Desenvolvido por Flavia 💙")
 
 # ==============================================================================
-# --- SEÇÃO 3: ANÁLISE DE PALAVRAS (VERSÃO COM CONTROLE FINO) ---
+# --- SEÇÃO 3: ANÁLISE DE PALAVRAS (VERSÃO COM GRADIENTE CORRETO) ---
 # ==============================================================================
 elif pagina_selecionada == "Análise de Palavras":
+
+    # --- FUNÇÃO DE CORES PERSONALIZADA (VERMELHO -> AMARELO) ---
+    def cor_gradiente_vermelho_amarelo(word, font_size, position, orientation, random_state=None, **kwargs):
+        """
+        Cria um gradiente de cor baseado na frequência da palavra.
+        Usa o modelo de cor HSL (Hue, Saturation, Lightness).
+        - Hue 0 = Vermelho
+        - Hue 60 = Amarelo
+        A função mapeia a frequência da palavra para um tom entre vermelho e amarelo.
+        """
+        # Pega a frequência máxima do dicionário para normalizar
+        max_freq = max(list(kwargs['frequencies'].values()))
+        # Pega a frequência da palavra atual
+        current_freq = kwargs['frequencies'][word]
+        
+        # Normaliza a frequência (um valor entre 0 e 1)
+        normalized_freq = current_freq / max_freq
+        
+        # Mapeia a frequência para um tom (Hue) entre 0 (vermelho) e 55 (amarelo/laranja)
+        # Quanto maior a frequência, mais perto de 0 (vermelho)
+        hue = int(55 * (1 - normalized_freq))
+        
+        # Retorna a cor no formato HSL que a biblioteca entende
+        return f"hsl({hue}, 100%, 50%)"
+
 
     st.markdown("<h1 style='text-align: center; color: white;'>📜 Análise de Tipos de Evento</h1>", unsafe_allow_html=True)
     st.info("Esta seção exibe a frequência dos eventos.")
 
     try:
         df_frequencia_frase = pd.read_csv("Frequencia_Frases_Evento.csv")
-
         st.subheader("Frequência de Tipos de Evento")
         
-        # --- MUDANÇA 1: CONTROLE FINO DO TAMANHO DAS FRASES ---
-        # Criei um "fator de escala" para controlar a diferença de tamanho.
-        # 1.0 = diferença máxima (original)
-        # 0.5 = raiz quadrada (diferença média) <-- BOM PONTO DE PARTIDA
-        # < 0.5 = diferenças cada vez menores
-        fator_de_escala = 0.5 
+        dicionario_frases = dict(zip(df_frequencia_frase['Frase'], df_frequencia_frase['Contagem']))
         
-        dicionario_frases_escalonado = dict(zip(
-            df_frequencia_frase['Frase'], 
-            df_frequencia_frase['Contagem'] ** fator_de_escala
-        ))
-        
-        if not dicionario_frases_escalonado:
+        if not dicionario_frases:
             st.warning("Não há dados de frequência para gerar a nuvem de palavras de eventos.")
         else:
             wordcloud_frases = WordCloud(
-                width=800, height=400, background_color="black", 
-                colormap="hot", collocations=False
-            ).generate_from_frequencies(dicionario_frases_escalonado)
+                width=800, height=400, background_color="black",
+                # --- MUDANÇA PRINCIPAL: Usando a função de cor personalizada ---
+                color_func=cor_gradiente_vermelho_amarelo, # Substitui o 'colormap'
+                collocations=False
+            ).generate_from_frequencies(dicionario_frases)
 
             fig_frases, ax_frases = plt.subplots(figsize=(7, 5))
             plt.style.use("dark_background")
             ax_frases.imshow(wordcloud_frases, interpolation="bilinear")
             ax_frases.axis("off")
 
-            # --- MUDANÇA 2: CONTROLE PRECISO DO TAMANHO DO QUADRO ---
-            # Usamos colunas para criar "margens" e forçar o gráfico a ficar menor no centro
             col1, col2, col3 = st.columns([1, 6, 1])
             with col2:
                 st.pyplot(fig_frases)
 
-        # A tabela de frequência continua a mesma, mostrando os números reais
         with st.expander("Ver Tabela de Frequência Completa de Eventos"):
             df_frequencia_frase['Porcentagem'] = df_frequencia_frase['Porcentagem'].map('{:.2f}%'.format)
             st.dataframe(df_frequencia_frase, use_container_width=True, hide_index=True)
