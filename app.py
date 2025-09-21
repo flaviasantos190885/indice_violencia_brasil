@@ -392,7 +392,7 @@ elif pagina_selecionada == "🧠 Módulo de Previsão":
 elif pagina_selecionada == "📜 Análise de Palavras":
 
     st.markdown("<h1 style='text-align: center; color: white;'>📜 Análise de Tipos de Evento</h1>", unsafe_allow_html=True)
-    st.info("Esta seção exibe a frequência dos eventos.")
+    st.info("Frequência dos eventos exibidas em Nuvem de Palavras e através de uma tabela de percentual de cada evento.")
 
     try:
         df_frequencia_frase = pd.read_csv("Frequencia_Frases_Evento.csv")
@@ -450,7 +450,7 @@ elif pagina_selecionada == "📜 Análise de Palavras":
 elif pagina_selecionada == "⚙️ Detalhes Técnicos":
 
     st.markdown("<h1 style='text-align: center; color: white;'>⚙️ Detalhes Técnicos do Projeto</h1>", unsafe_allow_html=True)
-    st.info("Esta seção descreve a arquitetura, as tecnologias e a metodologia utilizadas para o desenvolvimento desta ferramenta de análise e previsão.")
+    st.info("Arquitetura, tecnologias e a metodologia utilizadas para o desenvolvimento desta ferramenta de análise e previsão.")
 
     st.markdown("---")
 
