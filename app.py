@@ -11,7 +11,7 @@ import spacy
 import os
 
 
-# --- ADICIONADO: Carregar modelo de linguagem para stopwords ---
+# --- ADICIONADO: Carregar modelo de linguagem para stopwords funcionando 100% ---
 try:
     nlp = spacy.load('pt_core_news_sm')
 except OSError:
