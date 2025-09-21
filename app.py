@@ -63,6 +63,23 @@ with st.sidebar:
         }
     </style>
     """, unsafe_allow_html=True)
+    
+        # --- EMOJIS DE NAVEGAÇÃO (ICONS) ---
+    st.markdown(
+        """
+        <div style="text-align: center; font-size: 28px;">
+            <a href="https://dados-violencia-brasil-2015-a-2024.streamlit.app/" target="_self" title="Home">🏠</a> &nbsp;
+            <a href="#dashboard-de-análise" title="Dashboard de Análise">📊</a> &nbsp;
+            <a href="#módulo-de-previsão" title="Módulo de Previsão">🧠</a> &nbsp;
+            <a href="#análise-de-palavras" title="Análise de Palavras">📜</a> &nbsp;
+            <a href="#detalhes-técnicos" title="Detalhes Técnicos">⚙️</a> &nbsp;
+            <a href="#sobre-o-projeto" title="Sobre o Projeto">ℹ️</a>
+        </div>
+        <br>
+        """,
+        unsafe_allow_html=True
+    )
+
 
     st.header("Menu Interativo")
     pagina_selecionada = st.radio(
