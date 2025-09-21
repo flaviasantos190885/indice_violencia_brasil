@@ -66,52 +66,6 @@ with st.sidebar:
     """, unsafe_allow_html=True)
     
 with st.sidebar:
-    # --- CSS PARA ESTILIZAR OS ÍCONES ---
-    st.markdown(
-        """
-        <style>
-            .nav-icons {
-                display: flex;
-                justify-content: center;
-                gap: 6px;           /* espaço entre ícones */
-                font-size: 24px;    /* tamanho dos emojis */
-                margin-bottom: 12px;
-            }
-            .nav-icons span {
-                cursor: pointer;
-            }
-        </style>
-        <div class="nav-icons">
-            <span onclick="window.parent.postMessage({type: 'streamlit:setComponentValue', key: 'menu_radio', value: '🏠 Início'}, '*')">🏠</span>
-            <span onclick="window.parent.postMessage({type: 'streamlit:setComponentValue', key: 'menu_radio', value: '📊 Dashboard de Análise'}, '*')">📊</span>
-            <span onclick="window.parent.postMessage({type: 'streamlit:setComponentValue', key: 'menu_radio', value: '🧠 Módulo de Previsão'}, '*')">🧠</span>
-            <span onclick="window.parent.postMessage({type: 'streamlit:setComponentValue', key: 'menu_radio', value: '📜 Análise de Palavras'}, '*')">📜</span>
-            <span onclick="window.parent.postMessage({type: 'streamlit:setComponentValue', key: 'menu_radio', value: '⚙️ Detalhes Técnicos'}, '*')">⚙️</span>
-            <span onclick="window.parent.postMessage({type: 'streamlit:setComponentValue', key: 'menu_radio', value: 'ℹ️ Sobre o Projeto'}, '*')">ℹ️</span>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-
-    # --- RADIO PRINCIPAL (único, sem duplicação) ---
-    st.header("Menu Interativo")
-    pagina_selecionada = st.radio(
-        "Escolha uma seção:",
-        [
-            "🏠 Início",
-            "📊 Dashboard de Análise",
-            "🧠 Módulo de Previsão",
-            "📜 Análise de Palavras",
-            "⚙️ Detalhes Técnicos",
-            "ℹ️ Sobre o Projeto"
-        ],
-        key="menu_radio"
-    )
-
-    st.markdown("---")
-    st.info(
-        "Este painel oferece uma análise visual dos dados de violência e um módulo para estimativas futuras."
-    )
 
 
     st.header("Menu Interativo")
