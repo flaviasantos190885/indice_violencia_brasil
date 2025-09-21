@@ -87,7 +87,7 @@ with st.sidebar:
         unsafe_allow_html=True
     )
 
-    # --- Sincronizar links com radio ---
+    # --- Sincronizar links com radio já existente ---
     query_params = st.query_params
     menu_url = query_params.get("menu", [None])[0]
 
@@ -107,7 +107,12 @@ with st.sidebar:
 
     with st.sidebar:
         st.header("Menu Interativo")
-        pagina_selecionada = st.radio("Escolha uma seção:", opcoes, index=default_index)
+        pagina_selecionada = st.radio(
+            "Escolha uma seção:",
+            opcoes,
+            index=default_index,
+            key="menu_radio"   # 🔑 chave única para evitar conflito
+        )
         st.markdown("---")
         st.info("Este painel oferece uma análise visual dos dados de violência e um módulo para estimativas futuras.")
 
