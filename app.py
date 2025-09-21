@@ -425,49 +425,77 @@ elif pagina_selecionada == "Análise de Palavras":
     st.markdown("---")
     st.markdown("Desenvolvido por Flavia 💙")
     
-    # ==============================================================================
-# --- SEÇÃO 5: SOBRE O PROJETO ---
+# ==============================================================================
+# --- SEÇÃO 5: SOBRE O PROJETO (VERSÃO COM IMAGENS) ---
 # ==============================================================================
 elif pagina_selecionada == "Sobre o Projeto":
 
-    st.markdown("<h1 style='text-align: center; color: white;'>📜 Sobre o Projeto e a Fonte dos Dados</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='text-align: center; color: white;'> ℹ️ Sobre o Projeto e a Fonte dos Dados</h1>", unsafe_allow_html=True)
     st.info("Este painel foi desenvolvido para visualizar e analisar os dados abertos sobre segurança pública no Brasil, com o objetivo de promover a transparência e facilitar o entendimento sobre o tema.")
 
     st.markdown("---")
 
-    # --- SEÇÃO SOBRE A FONTE DOS DADOS ---
-    st.subheader("Fonte dos Dados")
-    st.markdown("""
-    Os dados utilizados neste projeto foram coletados do portal do **Ministério da Justiça e Segurança Pública (MJSP)**, através da Secretaria Nacional de Segurança Pública (SENASP). 
-    
-    As informações são provenientes do **Sistema Nacional de Informações de Segurança Pública (SINESP)** e cobrem o período de **2015 a 2024**.
-    
-    **Links Oficiais:**
-    - **Portal Principal:** [Ministério da Justiça e Segurança Pública](https://www.gov.br/mj/pt-br/assuntos/sua-seguranca/seguranca-publica)
-    - **Base de Dados Específica:** [Dados Nacionais - SINESP VDE](https://www.gov.br/mj/pt-br/assuntos/sua-seguranca/seguranca-publica/estatistica/dados-nacionais-1/base-de-dados-e-notas-metodologicas-dos-gestores-estaduais-sinesp-vde-2022-e-2023)
-    """)
+    # --- SEÇÃO FONTE DOS DADOS (IMAGEM À ESQUERDA) ---
+    col1, col2 = st.columns([1, 2]) # Divide o espaço em 1/3 para imagem, 2/3 para texto
 
-    st.markdown("---")
+    with col1:
+        st.image(
+            "imagem_dados.png", # << NOME DO SEU ARQUIVO DE IMAGEM
+            caption="Visualização de Dados Governamentais",
+            use_column_width=True
+        )
 
-    # --- SEÇÃO SOBRE O MAPA DA SEGURANÇA ---
-    st.subheader("O Mapa da Segurança Pública")
-    st.write("""
-    O Mapa da Segurança Pública, uma publicação anual do MJSP, representa um avanço significativo na gestão e transparência dos dados de segurança pública no Brasil. Ele sistematiza e publiciza, de forma organizada, os principais indicadores criminais e estatísticas coletadas em âmbito nacional, servindo como referência para a formulação de políticas públicas, diagnósticos e pesquisas. 
-    
-    Além disso, reforça o compromisso do Ministério com a divulgação regular e padronizada dessas informações, promovendo maior transparência e apoio à tomada de decisões estratégicas na área da segurança.
-    """)
-    
-    st.markdown("---")
-
-    # --- SEÇÃO SOBRE A SENASP (DENTRO DE UM EXPANSOR) ---
-    with st.expander("Clique para ler sobre as atribuições da Secretaria Nacional de Segurança Pública (SENASP)"):
-        st.write("""
-        A Secretaria Nacional de Segurança Pública – SENASP foi criada pelo Decreto nº 2.315, de 4 de setembro de 1997.
+    with col2:
+        st.subheader("Fonte dos Dados")
+        st.markdown("""
+        Os dados utilizados neste projeto foram coletados do portal do **Ministério da Justiça e Segurança Pública (MJSP)**, através da Secretaria Nacional de Segurança Pública (SENASP). 
+        As informações são provenientes do **Sistema Nacional de Informações de Segurança Pública (SINESP)** e cobrem o período de **2015 a 2024**.
         
-        A SENASP é responsável por formular políticas, diretrizes e ações para a segurança pública no país. Possui como objetivo promover a integração e a coordenação entre as diferentes esferas governamentais e agências de segurança para enfrentar desafios relacionados à segurança pública, como a prevenção de crimes, combate à violência e capacitação de profissionais da área.
-        
-        Compete à SENASP o assessoramento técnico ao Ministro da Justiça, integrando os entes federativos e os órgãos que compõem o Sistema Único de Segurança Pública (SUSP), além de promover a gestão do Fundo Nacional de Segurança Pública (FNSP).
+        **Links Oficiais:**
+        - **Portal Principal:** [Ministério da Justiça e Segurança Pública](https://www.gov.br/mj/pt-br/assuntos/sua-seguranca/seguranca-publica)
+        - **Base de Dados Específica:** [Dados Nacionais - SINESP VDE](https://www.gov.br/mj/pt-br/assuntos/sua-seguranca/seguranca-publica/estatistica/dados-nacionais-1/base-de-dados-e-notas-metodologicas-dos-gestores-estaduais-sinesp-vde-2022-e-2023)
         """)
+
+    st.markdown("---")
+
+    # --- SEÇÃO MAPA DA SEGURANÇA (TEXTO À ESQUERDA) ---
+    col3, col4 = st.columns([2, 1]) # Divide o espaço em 2/3 para texto, 1/3 para imagem
+
+    with col3:
+        st.subheader("O Mapa da Segurança Pública")
+        st.write("""
+        O Mapa da Segurança Pública, uma publicação anual do MJSP, representa um avanço significativo na gestão e transparência dos dados de segurança pública no Brasil. Ele sistematiza e publiciza, de forma organizada, os principais indicadores criminais e estatísticas coletadas em âmbito nacional, servindo como referência para a formulação de políticas públicas, diagnósticos e pesquisas. 
+        
+        Além disso, reforça o compromisso do Ministério com a divulgação regular e padronizada dessas informações, promovendo maior transparência e apoio à tomada de decisões estratégicas na área da segurança.
+        """)
+        
+    with col4:
+        st.image(
+            "imagem_mapa.png", # << NOME DO SEU ARQUIVO DE IMAGEM
+            caption="Transparência e Gestão de Dados",
+            use_column_width=True
+        )
+
+    st.markdown("---")
+
+    # --- SEÇÃO SOBRE A SENASP (COM IMAGEM DENTRO DO EXPANSOR) ---
+    with st.expander("Clique para ler sobre as atribuições da Secretaria Nacional de Segurança Pública (SENASP)"):
+        
+        col5, col6 = st.columns([1, 2])
+        
+        with col5:
+            st.image(
+                "imagem_senasp.png", # << NOME DO SEU ARQUIVO DE IMAGEM
+                caption="SENASP - Integração da Segurança Pública",
+                use_column_width=True
+            )
+            
+        with col6:
+            st.write("""
+            A Secretaria Nacional de Segurança Pública – SENASP foi criada pelo Decreto nº 2.315, de 4 de setembro de 1997.
+            
+            A SENASP é responsável por formular políticas, diretrizes e ações para a segurança pública no país. Possui como objetivo promover a integração e a coordenação entre as diferentes esferas governamentais e agências de segurança para enfrentar desafios relacionados à segurança pública, como a prevenção de crimes, combate à violência e capacitação de profissionais da área.
+            """)
 
     # Rodapé
     st.markdown("---")
