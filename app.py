@@ -65,33 +65,52 @@ with st.sidebar:
     </style>
     """, unsafe_allow_html=True)
     
-    # --- EMOJIS DE NAVEGAÇÃO (ICONS) ---
+# --- ÍCONES DE NAVEGAÇÃO ---
 st.markdown(
     """
     <style>
         .nav-icons a {
             text-decoration: none;  /* remove linha azul */
-            font-size: 22px;        /* tamanho menor dos emojis */
+            font-size: 22px;        /* tamanho dos emojis */
             margin: 0 6px;          /* espaço entre os ícones */
         }
     </style>
     <div class="nav-icons" style="text-align: center;">
-        <a href="/?menu=Home" title="Home">🏠</a>
-        <a href="/?menu=Dashboard de Análise" title="Dashboard de Análise">📊</a>
-        <a href="/?menu=Módulo de Previsão" title="Módulo de Previsão">🧠</a>
-        <a href="/?menu=Análise de Palavras" title="Análise de Palavras">📜</a>
-        <a href="/?menu=Detalhes Técnicos" title="Detalhes Técnicos">⚙️</a>
-        <a href="/?menu=Sobre o Projeto" title="Sobre o Projeto">ℹ️</a>
+        <a href="/?menu=📊 Dashboard de Análise" title="Dashboard de Análise">📊</a>
+        <a href="/?menu=🧠 Módulo de Previsão" title="Módulo de Previsão">🧠</a>
+        <a href="/?menu=📜 Análise de Palavras" title="Análise de Palavras">📜</a>
+        <a href="/?menu=⚙️ Detalhes Técnicos" title="Detalhes Técnicos">⚙️</a>
+        <a href="/?menu=ℹ️ Sobre o Projeto" title="Sobre o Projeto">ℹ️</a>
     </div>
     <br>
     """,
     unsafe_allow_html=True
 )
 
-# --- Sincronizar links com o menu do sidebar ---
-query_params = st.experimental_get_query_params()
-if "menu" in query_params:
-    st.session_state["menu"] = query_params["menu"][0]
+# --- Sincronizar links com radio ---
+query_params = st.query_params
+menu_url = query_params.get("menu", [None])[0]
+
+opcoes = [
+    "📊 Dashboard de Análise",
+    "🧠 Módulo de Previsão",
+    "📜 Análise de Palavras",
+    "⚙️ Detalhes Técnicos",
+    "ℹ️ Sobre o Projeto"
+]
+
+# Se veio da URL, usa como default, senão usa a primeira opção
+if menu_url in opcoes:
+    default_index = opcoes.index(menu_url)
+else:
+    default_index = 0
+
+with st.sidebar:
+    st.header("Menu Interativo")
+    pagina_selecionada = st.radio("Escolha uma seção:", opcoes, index=default_index)
+    st.markdown("---")
+    st.info("Este painel oferece uma análise visual dos dados de violência e um módulo para estimativas futuras.")
+
 
 
     st.header("Menu Interativo")
