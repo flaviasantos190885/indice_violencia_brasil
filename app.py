@@ -128,6 +128,8 @@ if st.session_state.pagina_selecionada == "📊 Dashboard de Análise":
     # ---------- TÍTULO GLOBAL ----------
     st.markdown("<h1 style='text-align: center; font-size: 40px; color: white'>📊 Dados da Violência no Brasil</h1>", unsafe_allow_html=True)
     
+    menu_horizontal() # << ADICIONE ESTA LINHA AQUI
+    
     st.info("Este painel interativo permite a exploração detalhada dos dados de violência. Utilize os filtros de Ano, Estado e Tipo de Evento para visualizar os gráficos e a tabela com informações específicas. Dica: ao selecionar um único estado, o filtro por cidade será habilitado para uma análise ainda mais granular.")
 
     # Filtros disponíveis
@@ -316,6 +318,9 @@ if st.session_state.pagina_selecionada == "📊 Dashboard de Análise":
 elif st.session_state.pagina_selecionada == "🧠 Módulo de Previsão":
     
     st.markdown("<h1 style='text-align: center; color: white;'>🧠 Módulo de Previsão Anual</h1>", unsafe_allow_html=True)
+    
+    menu_horizontal() # << ADICIONE ESTA LINHA AQUI
+    
     st.markdown("#### Como Funciona?")
     st.info("""
     Este módulo utiliza um modelo de Inteligência Artificial, especificamente uma **rede neural recorrente (LSTM - Long Short-Term Memory)**, para projetar estimativas futuras. O modelo foi treinado para reconhecer padrões em sequências de eventos com base nos dados históricos de 2015 a 2024. 
@@ -423,6 +428,9 @@ elif st.session_state.pagina_selecionada == "🧠 Módulo de Previsão":
 elif st.session_state.pagina_selecionada == "📜 Análise de Palavras":
 
     st.markdown("<h1 style='text-align: center; color: white;'>📜 Análise de Tipos de Evento</h1>", unsafe_allow_html=True)
+    
+    menu_horizontal() # << ADICIONE ESTA LINHA AQUI
+    
     st.info("Frequência dos eventos exibidas em Nuvem de Palavras e através de uma tabela de percentual de cada evento.")
 
     try:
@@ -481,6 +489,9 @@ elif st.session_state.pagina_selecionada == "📜 Análise de Palavras":
 elif st.session_state.pagina_selecionada == "⚙️ Detalhes Técnicos":
 
     st.markdown("<h1 style='text-align: center; color: white;'>⚙️ Detalhes Técnicos do Projeto</h1>", unsafe_allow_html=True)
+    
+    menu_horizontal() # << ADICIONE ESTA LINHA AQUI
+    
     st.info("Arquitetura, tecnologias e a metodologia utilizadas para o desenvolvimento desta ferramenta de análise e previsão.")
 
     st.markdown("---")
@@ -571,6 +582,9 @@ elif st.session_state.pagina_selecionada == "⚙️ Detalhes Técnicos":
 elif st.session_state.pagina_selecionada == "ℹ️ Sobre o Projeto":
 
     st.markdown("<h1 style='text-align: center; color: white;'>ℹ️ Sobre o Projeto e a Fonte dos Dados</h1>", unsafe_allow_html=True)
+    
+    menu_horizontal() # << ADICIONE ESTA LINHA AQUI
+    
     st.info("Este painel foi desenvolvido para visualizar e analisar os dados abertos sobre segurança pública no Brasil, com o objetivo de promover a transparência e facilitar o entendimento sobre o tema.")
 
     st.markdown("---")
