@@ -67,7 +67,7 @@ with st.sidebar:
     st.header("Menu Interativo")
     pagina_selecionada = st.radio(
         "Escolha uma seção:",
-        ("Dashboard de Análise", "Módulo de Previsão", "Análise de Palavras", "Detalhes Técnicos", "Sobre o Projeto")
+        (" 📊 Dashboard de Análise", "Módulo de Previsão", "Análise de Palavras", "Detalhes Técnicos", "Sobre o Projeto")
     )
     st.markdown("---")
     st.info("Este painel oferece uma análise visual dos dados de violência e um módulo para estimativas futuras.")
