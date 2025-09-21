@@ -65,57 +65,51 @@ with st.sidebar:
     </style>
     """, unsafe_allow_html=True)
     
+with st.sidebar:
     # --- ÍCONES DE NAVEGAÇÃO ---
     st.markdown(
         """
         <style>
-            .nav-icons a {
-                text-decoration: none;  /* remove linha azul */
-                font-size: 15px;        /* tamanho dos emojis */
-                margin: 0 6px;          /* espaço entre os ícones */
+            .nav-icons {
+                display: flex;
+                justify-content: center;
+                gap: 4px;           /* diminui espaço entre ícones */
+                font-size: 22px;    /* tamanho dos emojis */
+                margin-bottom: 10px;
+            }
+            .nav-icons span {
+                cursor: pointer;
             }
         </style>
-        <div class="nav-icons" style="text-align: center;">
-            <a href="/?menu=📊 Dashboard de Análise" title="Dashboard de Análise">📊</a>
-            <a href="/?menu=🧠 Módulo de Previsão" title="Módulo de Previsão">🧠</a>
-            <a href="/?menu=📜 Análise de Palavras" title="Análise de Palavras">📜</a>
-            <a href="/?menu=⚙️ Detalhes Técnicos" title="Detalhes Técnicos">⚙️</a>
-            <a href="/?menu=ℹ️ Sobre o Projeto" title="Sobre o Projeto">ℹ️</a>
+        <div class="nav-icons">
+            <span onclick="window.parent.postMessage({type: 'streamlit:setComponentValue', key: 'menu_radio', value: '📊 Dashboard de Análise'}, '*')">📊</span>
+            <span onclick="window.parent.postMessage({type: 'streamlit:setComponentValue', key: 'menu_radio', value: '🧠 Módulo de Previsão'}, '*')">🧠</span>
+            <span onclick="window.parent.postMessage({type: 'streamlit:setComponentValue', key: 'menu_radio', value: '📜 Análise de Palavras'}, '*')">📜</span>
+            <span onclick="window.parent.postMessage({type: 'streamlit:setComponentValue', key: 'menu_radio', value: '⚙️ Detalhes Técnicos'}, '*')">⚙️</span>
+            <span onclick="window.parent.postMessage({type: 'streamlit:setComponentValue', key: 'menu_radio', value: 'ℹ️ Sobre o Projeto'}, '*')">ℹ️</span>
         </div>
-        <br>
         """,
         unsafe_allow_html=True
     )
 
-    # --- Sincronizar links com radio já existente ---
-    query_params = st.query_params
-    menu_url = query_params.get("menu", [None])[0]
+    # --- RADIO PRINCIPAL (único) ---
+    st.header("Menu Interativo")
+    pagina_selecionada = st.radio(
+        "Escolha uma seção:",
+        [
+            "📊 Dashboard de Análise",
+            "🧠 Módulo de Previsão",
+            "📜 Análise de Palavras",
+            "⚙️ Detalhes Técnicos",
+            "ℹ️ Sobre o Projeto"
+        ],
+        key="menu_radio"
+    )
 
-    opcoes = [
-        "📊 Dashboard de Análise",
-        "🧠 Módulo de Previsão",
-        "📜 Análise de Palavras",
-        "⚙️ Detalhes Técnicos",
-        "ℹ️ Sobre o Projeto"
-    ]
-
-    # Se veio da URL, usa como default, senão usa a primeira opção
-    if menu_url in opcoes:
-        default_index = opcoes.index(menu_url)
-    else:
-        default_index = 0
-
-    with st.sidebar:
-        st.header("Menu Interativo")
-        pagina_selecionada = st.radio(
-            "Escolha uma seção:",
-            opcoes,
-            index=default_index,
-            key="menu_radio"   # 🔑 chave única para evitar conflito
-        )
-        st.markdown("---")
-        st.info("Este painel oferece uma análise visual dos dados de violência e um módulo para estimativas futuras.")
-
+    st.markdown("---")
+    st.info(
+        "Este painel oferece uma análise visual dos dados de violência e um módulo para estimativas futuras."
+    )
 
 
     st.header("Menu Interativo")
