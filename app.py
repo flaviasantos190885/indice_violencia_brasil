@@ -368,32 +368,42 @@ elif pagina_selecionada == "Módulo de Previsão":
         st.markdown("Desenvolvido por Flavia 💙")
 
 # ==============================================================================
-# --- SEÇÃO 3: ANÁLISE DE PALAVRAS ---
+# --- SEÇÃO 3: ANÁLISE DE PALAVRAS (VERSÃO COM AJUSTES VISUAIS) ---
 # ==============================================================================
 elif pagina_selecionada == "Análise de Palavras":
 
     st.markdown("<h1 style='text-align: center; color: white;'>📜 Análise de Tipos de Evento</h1>", unsafe_allow_html=True)
-    st.info("Esta seção exibe a frequência dos eventos .")
+    st.info("Esta seção exibe a frequência dos eventos.")
 
     try:
         # Carrega o arquivo novo e correto, com as frases de evento já prontas
         df_frequencia_frase = pd.read_csv("Frequencia_Frases_Evento.csv")
 
-        # Gera a nuvem a partir das frequências das frases
         st.subheader("Frequência de Tipos de Evento")
-        dicionario_frases = dict(zip(df_frequencia_frase['Frase'], df_frequencia_frase['Contagem']))
         
-        if not dicionario_frases:
+        # --- MUDANÇA 1: APLICANDO ESCALA LOGARÍTMICA ---
+        # Usamos np.log1p para diminuir a diferença drástica entre as contagens.
+        # Isso fará com que as frases com contagem menor apareçam maiores na nuvem.
+        dicionario_frases_log = dict(zip(df_frequencia_frase['Frase'], np.log1p(df_frequencia_frase['Contagem'])))
+        
+        if not dicionario_frases_log:
             st.warning("Não há dados de frequência para gerar a nuvem de palavras de eventos.")
         else:
-            wordcloud_frases = WordCloud(width=800, height=400, background_color="black", colormap="Dark2", collocations=False).generate_from_frequencies(dicionario_frases)
-            fig_frases, ax_frases = plt.subplots(figsize=(8, 5))
+            # --- MUDANÇA 2: DIMINUINDO O QUADRO ---
+            # Diminuímos a resolução da imagem para forçar as frases a ficarem mais juntas
+            wordcloud_frases = WordCloud(
+                width=400, height=250, background_color="black", 
+                colormap="Dark2", collocations=False
+            ).generate_from_frequencies(dicionario_frases_log)
+
+            # E também diminuímos o tamanho da área de exibição
+            fig_frases, ax_frases = plt.subplots(figsize=(7, 5))
             plt.style.use("dark_background")
             ax_frases.imshow(wordcloud_frases, interpolation="bilinear")
             ax_frases.axis("off")
             st.pyplot(fig_frases)
 
-        # Exibe a tabela de frequência das FRASES
+        # A tabela de frequência continua a mesma, mostrando os números reais
         with st.expander("Ver Tabela de Frequência Completa de Eventos"):
             df_frequencia_frase['Porcentagem'] = df_frequencia_frase['Porcentagem'].map('{:.2f}%'.format)
             st.dataframe(df_frequencia_frase, use_container_width=True, hide_index=True)
