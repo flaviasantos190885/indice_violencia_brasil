@@ -368,7 +368,7 @@ elif pagina_selecionada == "Módulo de Previsão":
         st.markdown("Desenvolvido por Flavia 💙")
 
 # ==============================================================================
-# --- SEÇÃO 3: ANÁLISE DE PALAVRAS (VERSÃO COM AJUSTES VISUAIS) ---
+# --- SEÇÃO 3: ANÁLISE DE PALAVRAS (VERSÃO COM CONTROLE FINO) ---
 # ==============================================================================
 elif pagina_selecionada == "Análise de Palavras":
 
@@ -376,32 +376,40 @@ elif pagina_selecionada == "Análise de Palavras":
     st.info("Esta seção exibe a frequência dos eventos.")
 
     try:
-        # Carrega o arquivo novo e correto, com as frases de evento já prontas
         df_frequencia_frase = pd.read_csv("Frequencia_Frases_Evento.csv")
 
         st.subheader("Frequência de Tipos de Evento")
         
-        # --- MUDANÇA 1: APLICANDO ESCALA LOGARÍTMICA ---
-        # Usamos np.log1p para diminuir a diferença drástica entre as contagens.
-        # Isso fará com que as frases com contagem menor apareçam maiores na nuvem.
-        dicionario_frases_log = dict(zip(df_frequencia_frase['Frase'], np.log1p(df_frequencia_frase['Contagem'])))
+        # --- MUDANÇA 1: CONTROLE FINO DO TAMANHO DAS FRASES ---
+        # Criei um "fator de escala" para controlar a diferença de tamanho.
+        # 1.0 = diferença máxima (original)
+        # 0.5 = raiz quadrada (diferença média) <-- BOM PONTO DE PARTIDA
+        # < 0.5 = diferenças cada vez menores
+        fator_de_escala = 0.5 
         
-        if not dicionario_frases_log:
+        dicionario_frases_escalonado = dict(zip(
+            df_frequencia_frase['Frase'], 
+            df_frequencia_frase['Contagem'] ** fator_de_escala
+        ))
+        
+        if not dicionario_frases_escalonado:
             st.warning("Não há dados de frequência para gerar a nuvem de palavras de eventos.")
         else:
-            # --- MUDANÇA 2: DIMINUINDO O QUADRO ---
-            # Diminuímos a resolução da imagem para forçar as frases a ficarem mais juntas
             wordcloud_frases = WordCloud(
-                width=400, height=250, background_color="black", 
+                width=800, height=400, background_color="black", 
                 colormap="Dark2", collocations=False
-            ).generate_from_frequencies(dicionario_frases_log)
+            ).generate_from_frequencies(dicionario_frases_escalonado)
 
-            # E também diminuímos o tamanho da área de exibição
             fig_frases, ax_frases = plt.subplots(figsize=(7, 5))
             plt.style.use("dark_background")
             ax_frases.imshow(wordcloud_frases, interpolation="bilinear")
             ax_frases.axis("off")
-            st.pyplot(fig_frases)
+
+            # --- MUDANÇA 2: CONTROLE PRECISO DO TAMANHO DO QUADRO ---
+            # Usamos colunas para criar "margens" e forçar o gráfico a ficar menor no centro
+            col1, col2, col3 = st.columns([1, 6, 1])
+            with col2:
+                st.pyplot(fig_frases)
 
         # A tabela de frequência continua a mesma, mostrando os números reais
         with st.expander("Ver Tabela de Frequência Completa de Eventos"):
@@ -409,7 +417,7 @@ elif pagina_selecionada == "Análise de Palavras":
             st.dataframe(df_frequencia_frase, use_container_width=True, hide_index=True)
 
     except FileNotFoundError:
-        st.error("Arquivo 'Frequencia_Frases_Evento.csv' não encontrado. Verifique se ele está no seu repositório.")
+        st.error("Arquivo 'Frequencia_Frases_Evento.csv' não encontrado.")
     except Exception as e:
         st.error(f"Ocorreu um erro na análise de eventos: {e}")
 
