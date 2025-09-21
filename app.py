@@ -10,7 +10,6 @@ from wordcloud import WordCloud
 import spacy
 import os
 
-
 # --- ADICIONADO: Carregar modelo de linguagem para stopwords ---
 try:
     nlp = spacy.load('pt_core_news_sm')
@@ -56,42 +55,32 @@ except FileNotFoundError:
 #     st.info("Este painel oferece uma análise visual dos dados de violência e um módulo para estimativas futuras.")
 
 with st.sidebar:
-    st.header("Menu Interativo")
-
-    # --- CSS para ajustar tamanho e tirar a linha azul ---
+    # --- CÓDIGO CSS PARA ADICIONAR ESPAÇAMENTO ---
     st.markdown("""
     <style>
-    /* Reduz o tamanho dos emojis/ícones no menu */
-    div[role="radiogroup"] label span {
-        font-size: 18px !important;
-    }
-    /* Remove sublinhado/linha azul */
-    div[role="radiogroup"] label a {
-        text-decoration: none !important;
-        color: inherit !important;
-    }
+        div[role="radiogroup"] > div {
+            margin-bottom: 1500px; /* Aumenta o espaço abaixo de cada item */
+        }
     </style>
     """, unsafe_allow_html=True)
 
+    st.header("Menu Interativo")
     pagina_selecionada = st.radio(
-        "Escolha uma seção:",
-        (
-            "📊 Dashboard de Análise",
-            "🧠 Módulo de Previsão",
-            "📜 Análise de Palavras",
-            "⚙️ Detalhes Técnicos",
-            "ℹ️ Sobre o Projeto"
-        ),
-        key="menu_principal"
+    "Escolha uma seção:",
+    (
+        "📊 Dashboard de Análise",
+        "🧠 Módulo de Previsão",
+        "📜 Análise de Palavras",
+        "⚙️ Detalhes Técnicos",
+        "ℹ️ Sobre o Projeto"
     )
-
+)
     st.markdown("---")
     st.info(
-        "Este painel oferece uma análise visual dos dados de violência e um módulo para estimativas futuras.   "
+        "Este painel oferece uma análise visual dos dados de violência e um módulo para estimativas futuras. "
         "O projeto representa o Trabalho de Conclusão de Curso (TCC) em Gestão da Tecnologia da Informação (GTI) "
         "pelo IF Sudeste MG - Campus Muriaé."
     )
-
 # ==============================================================================
 # --- SEÇÃO 1: DASHBOARD DE ANÁLISE (RESTAURADA DO ORIGINAL) ---
 # ==============================================================================
