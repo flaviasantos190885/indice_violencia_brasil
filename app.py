@@ -71,7 +71,7 @@ with st.sidebar:
         <style>
             .nav-icons a {
                 text-decoration: none;  /* remove linha azul */
-                font-size: 22px;        /* tamanho dos emojis */
+                font-size: 15px;        /* tamanho dos emojis */
                 margin: 0 6px;          /* espaço entre os ícones */
             }
         </style>
