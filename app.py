@@ -397,7 +397,7 @@ elif pagina_selecionada == "Análise de Palavras":
         else:
             wordcloud_frases = WordCloud(
                 width=800, height=400, background_color="black", 
-                colormap="hot", collocations=False
+                colormap="YlOrRd", collocations=False
             ).generate_from_frequencies(dicionario_frases_escalonado)
 
             fig_frases, ax_frases = plt.subplots(figsize=(7, 5))
