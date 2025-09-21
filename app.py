@@ -426,7 +426,7 @@ elif pagina_selecionada == "Análise de Palavras":
     st.markdown("Desenvolvido por Flavia 💙")
     
     # ==============================================================================
-# --- SEÇÃO 4: DETALHES TÉCNICOS DO PROJETO ---
+# --- SEÇÃO 4: DETALHES TÉCNICOS DO PROJETO (VERSÃO FINAL) ---
 # ==============================================================================
 elif pagina_selecionada == "Detalhes Técnicos":
 
@@ -439,22 +439,10 @@ elif pagina_selecionada == "Detalhes Técnicos":
     st.subheader("Tecnologias e Linguagens Utilizadas")
     st.markdown("""
     A ferramenta foi desenvolvida inteiramente na linguagem **Python**, utilizando um conjunto de bibliotecas especializadas para cada etapa do projeto:
-
-    - **Interface Web e Dashboard:**
-        - **Streamlit:** Framework principal para a criação da interface web interativa.
-    
-    - **Manipulação e Análise de Dados:**
-        - **Pandas:** Para carregamento, limpeza e manipulação dos dados tabulares.
-        - **NumPy:** Para operações numéricas e suporte a estruturas de dados multidimensionais.
-
-    - **Visualização de Dados:**
-        - **Plotly Express:** Para a criação dos gráficos interativos do dashboard (barras, linhas, pizza).
-        - **Matplotlib & WordCloud:** Para a geração das nuvens de palavras na análise de frequência.
-
-    - **Machine Learning e Modelagem Preditiva:**
-        - **TensorFlow (Keras):** Framework utilizado para construir, treinar e salvar o modelo de rede neural.
-        - **Scikit-learn:** Para pré-processamento dos dados (codificação de variáveis categóricas e normalização) antes do treinamento do modelo.
-        - **Joblib:** Para salvar e carregar os objetos de pré-processamento.
+    - **Interface Web e Dashboard:** **Streamlit**
+    - **Manipulação e Análise de Dados:** **Pandas** e **NumPy**
+    - **Visualização de Dados:** **Plotly Express**, **Matplotlib** e **WordCloud**
+    - **Machine Learning e Modelagem Preditiva:** **TensorFlow (Keras)**, **Scikit-learn** e **Joblib**
     """)
 
     st.markdown("---")
@@ -462,35 +450,59 @@ elif pagina_selecionada == "Detalhes Técnicos":
     # --- SEÇÃO DO MODELO DE PREVISÃO ---
     st.subheader("Modelo de Previsão: Rede Neural LSTM")
     st.write("""
-    O módulo de previsão utiliza um modelo de **Rede Neural Recorrente (RNN)** do tipo **LSTM (Long Short-Term Memory)**. Este tipo de arquitetura é especialmente eficaz para analisar sequências e dados de séries temporais, pois consegue "lembrar" de informações de passos anteriores para prever valores futuros.
+    O módulo de previsão utiliza um modelo de **Rede Neural Recorrente (RNN)** do tipo **LSTM (Long Short-Term Memory)**. Este tipo de arquitetura é especialmente eficaz para analisar sequências, pois consegue "lembrar" de informações de passos anteriores para prever valores futuros.
     """)
     
     col1, col2 = st.columns(2)
-    
     with col1:
         st.markdown("##### Pré-Processamento dos Dados")
         st.markdown("""
-        Antes de alimentar o modelo, os dados passam por um rigoroso pré-processamento:
-        1.  **Codificação Categórica:** Variáveis textuais como 'UF', 'evento' e 'arma' são transformadas em representações numéricas usando a técnica de *One-Hot Encoding*.
-        2.  **Normalização:** Todas as features numéricas são escalonadas para um intervalo entre 0 e 1, garantindo que nenhuma variável domine o processo de aprendizado.
-        3.  **Criação de Janelas:** Os dados são organizados em "janelas" sequenciais, onde o modelo aprende a prever o `total_vitima` de um evento com base nos dados dos 10 eventos anteriores.
+        1.  **Codificação Categórica:** Variáveis textuais são transformadas em representações numéricas (*One-Hot Encoding*).
+        2.  **Normalização:** Features numéricas são escalonadas para um intervalo entre 0 e 1.
+        3.  **Criação de Janelas:** Os dados são organizados em janelas sequenciais, onde o modelo aprende a prever um resultado com base nos 10 eventos anteriores.
         """)
 
     with col2:
         st.markdown("##### Arquitetura e Treinamento")
         st.markdown("""
-        O modelo foi construído com a API Keras do TensorFlow e salvo no arquivo `melhor_modelo_multivariado.keras`.
-        - **Estrutura:** A rede é composta por camadas LSTM seguidas de camadas `Dense` para processar a sequência e gerar a previsão final.
-        - **Otimizador:** Foi utilizado o otimizador `Adam`, que é eficiente e amplamente adotado para treinar redes neurais.
-        - **Função de Perda:** O modelo foi treinado para minimizar o **Erro Quadrático Médio (Mean Squared Error)**, uma métrica padrão para problemas de regressão.
-        - **Validação:** Os dados foram divididos em conjuntos de treino e teste para garantir que o modelo fosse capaz de generalizar e fazer previsões precisas em dados não vistos durante o treinamento.
+        - **Estrutura:** A rede é composta por camadas LSTM e `Dense` (Keras).
+        - **Otimizador:** Foi utilizado o otimizador `Adam`.
+        - **Função de Perda:** O modelo foi treinado para minimizar o Erro Quadrático Médio.
+        - **Validação:** Os dados foram divididos em conjuntos de treino e teste para garantir a generalização do modelo para dados não vistos.
         """)
+        
+    st.markdown("---") # Linha divisória
+
+    # --- NOVA SEÇÃO DE VERSIONAMENTO E DEPLOY ---
+    st.subheader("Versionamento e Deploy Contínuo")
+    st.markdown("""
+    Todo o código-fonte e os ativos do projeto são gerenciados e versionados com **Git** e estão hospedados em um repositório no **GitHub** chamado `dados-violencia-brasil`.
+
+    **Principais Arquivos no Repositório:**
+    - `app.py`: O script principal da aplicação Streamlit.
+    - `requirements.txt`: Lista de todas as bibliotecas Python necessárias para o projeto.
+    - `Dados_2015_2024.csv`: O arquivo de dados utilizado nos dashboards.
+    - `Frequencia_Frases_Evento.csv`: Arquivo pré-processado com as contagens de eventos para a análise de palavras.
+    - `melhor_modelo_multivariado.keras`: O arquivo do modelo de rede neural treinado.
+    - `.joblib`: Arquivos dos pré-processadores de dados.
+    """)
+    
+    st.markdown("""
+    A aplicação web é publicada e hospedada na plataforma **Streamlit Community Cloud**. Este serviço está diretamente conectado ao repositório do GitHub, o que permite um fluxo de **Integração Contínua e Deploy Contínuo (CI/CD)**.
+    
+    Qualquer atualização enviada (`git push`) do ambiente de desenvolvimento (VS Code) para o GitHub é automaticamente detectada pelo Streamlit Cloud, que atualiza a aplicação na web de forma síncrona. Isso garante que a versão online esteja sempre refletindo o código mais recente.
+    
+    **A aplicação pode ser acessada publicamente no endereço:**
+    [https://dados-violencia-brasil-2015-a-2024.streamlit.app/](https://dados-violencia-brasil-2015-a-2024.streamlit.app/)
+    """)
+
 
     # Rodapé
     st.markdown("---")
     st.markdown("Desenvolvido por Flavia 💙")
     
-    # ==============================================================================
+
+# ==============================================================================
 # --- SEÇÃO 5: SOBRE O PROJETO ---
 # ==============================================================================
 elif pagina_selecionada == "Sobre o Projeto":
