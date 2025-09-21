@@ -10,53 +10,6 @@ from wordcloud import WordCloud
 import spacy
 import os
 
-# --- CONTROLE DE NAVEGAÇÃO E MENU HORIZONTAL ---
-
-# Define a lista de páginas em um único lugar
-PAGINAS = {
-    "Dashboard": "📊 Dashboard de Análise",
-    "Previsão": "🧠 Módulo de Previsão",
-    "Análise": "📜 Análise de Palavras",
-    "Detalhes": "⚙️ Detalhes Técnicos",
-    "Sobre": "ℹ️ Sobre o Projeto"
-}
-
-def menu_horizontal():
-    # Pega a lista de nomes curtos para os botões
-    paginas_botoes = list(PAGINAS.keys())
-    
-    # Cria as colunas
-    colunas = st.columns(len(paginas_botoes) + 1) # +1 para o botão Home
-
-    # Botão Home
-    with colunas[0]:
-        if st.button("🏠 Home", use_container_width=True):
-            # Recarrega a página usando um truque com query params
-            st.query_params["page"] = "home"
-    
-    # Botões das outras páginas
-    for i, pagina in enumerate(paginas_botoes):
-        with colunas[i+1]:
-            if st.button(pagina, use_container_width=True):
-                # Usa query_params para "dizer" ao Streamlit para qual página ir
-                st.query_params["page"] = pagina
-
-    st.markdown("<hr>", unsafe_allow_html=True)
-
-# Lógica para decidir qual página mostrar
-# 1. Tenta pegar a página do URL (se um botão foi clicado)
-pagina_query = st.query_params.get("page", None)
-
-# 2. Se nenhum botão foi clicado, usa o menu lateral como padrão
-if pagina_query in PAGINAS:
-    pagina_selecionada = PAGINAS[pagina_query]
-else:
-    with st.sidebar:
-        # Seu menu radio original, sem nenhuma alteração
-        pagina_selecionada = st.radio(
-            "Escolha uma seção:",
-            list(PAGINAS.values())
-        )
 
 # --- ADICIONADO: Carregar modelo de linguagem para stopwords ---
 try:
@@ -148,7 +101,6 @@ if pagina_selecionada == "📊 Dashboard de Análise":
 
     # ---------- TÍTULO GLOBAL ----------
     st.markdown("<h1 style='text-align: center; font-size: 40px; color: white'>📊 Dados da Violência no Brasil</h1>", unsafe_allow_html=True)
-
     
     st.info("Este painel interativo permite a exploração detalhada dos dados de violência. Utilize os filtros de Ano, Estado e Tipo de Evento para visualizar os gráficos e a tabela com informações específicas. Dica: ao selecionar um único estado, o filtro por cidade será habilitado para uma análise ainda mais granular.")
 
