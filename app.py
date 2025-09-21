@@ -67,18 +67,43 @@ with st.sidebar:
     
 with st.sidebar:
 
-
     st.header("Menu Interativo")
+    
+    # --- CSS para ajustar tamanho e tirar a linha azul ---
+    st.markdown("""
+    <style>
+    /* Reduz o tamanho dos emojis/ícones no menu */
+    div[role="radiogroup"] label span {
+        font-size: 18px !important;  /* antes estava muito grande */
+    }
+
+    /* Remove sublinhado/linha azul */
+    div[role="radiogroup"] label a {
+        text-decoration: none !important;
+        color: inherit !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
     pagina_selecionada = st.radio(
-    "Escolha uma seção:",
-    (
-        "📊 Dashboard de Análise",
-        "🧠 Módulo de Previsão",
-        "📜 Análise de Palavras",
-        "⚙️ Detalhes Técnicos",
-        "ℹ️ Sobre o Projeto"
+        "Escolha uma seção:",
+        (
+            "📊 Dashboard de Análise",
+            "🧠 Módulo de Previsão",
+            "📜 Análise de Palavras",
+            "⚙️ Detalhes Técnicos",
+            "ℹ️ Sobre o Projeto"
+        ),
+        key="menu_principal"
     )
-)
+
+    st.markdown("---")
+    st.info(
+        "Este painel oferece uma análise visual dos dados de violência e um módulo para estimativas futuras.   "
+        "O projeto representa o Trabalho de Conclusão de Curso (TCC) em Gestão da Tecnologia da Informação (GTI) "
+        "pelo IF Sudeste MG - Campus Muriaé."
+    )
+
     st.markdown("---")
     st.info(
         "Este painel oferece uma análise visual dos dados de violência e um módulo para estimativas futuras.   "
