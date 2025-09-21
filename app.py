@@ -67,7 +67,7 @@ with st.sidebar:
     st.header("Menu Interativo")
     pagina_selecionada = st.radio(
         "Escolha uma seção:",
-        ("Dashboard de Análise", "Módulo de Previsão", "Análise de Palavras")
+        ("Dashboard de Análise", "Módulo de Previsão", "Análise de Palavras", "Sobre o Projeto")
     )
     st.markdown("---")
     st.info("Este painel oferece uma análise visual dos dados de violência e um módulo para estimativas futuras.")
@@ -420,6 +420,54 @@ elif pagina_selecionada == "Análise de Palavras":
         st.error("Arquivo 'Frequencia_Frases_Evento.csv' não encontrado.")
     except Exception as e:
         st.error(f"Ocorreu um erro na análise de eventos: {e}")
+
+    # Rodapé
+    st.markdown("---")
+    st.markdown("Desenvolvido por Flavia 💙")
+    
+    # ==============================================================================
+# --- SEÇÃO 5: SOBRE O PROJETO ---
+# ==============================================================================
+elif pagina_selecionada == "Sobre o Projeto":
+
+    st.markdown("<h1 style='text-align: center; color: white;'>📜 Sobre o Projeto e a Fonte dos Dados</h1>", unsafe_allow_html=True)
+    st.info("Este painel foi desenvolvido para visualizar e analisar os dados abertos sobre segurança pública no Brasil, com o objetivo de promover a transparência e facilitar o entendimento sobre o tema.")
+
+    st.markdown("---")
+
+    # --- SEÇÃO SOBRE A FONTE DOS DADOS ---
+    st.subheader("Fonte dos Dados")
+    st.markdown("""
+    Os dados utilizados neste projeto foram coletados do portal do **Ministério da Justiça e Segurança Pública (MJSP)**, através da Secretaria Nacional de Segurança Pública (SENASP). 
+    
+    As informações são provenientes do **Sistema Nacional de Informações de Segurança Pública (SINESP)** e cobrem o período de **2015 a 2024**.
+    
+    **Links Oficiais:**
+    - **Portal Principal:** [Ministério da Justiça e Segurança Pública](https://www.gov.br/mj/pt-br/assuntos/sua-seguranca/seguranca-publica)
+    - **Base de Dados Específica:** [Dados Nacionais - SINESP VDE](https://www.gov.br/mj/pt-br/assuntos/sua-seguranca/seguranca-publica/estatistica/dados-nacionais-1/base-de-dados-e-notas-metodologicas-dos-gestores-estaduais-sinesp-vde-2022-e-2023)
+    """)
+
+    st.markdown("---")
+
+    # --- SEÇÃO SOBRE O MAPA DA SEGURANÇA ---
+    st.subheader("O Mapa da Segurança Pública")
+    st.write("""
+    O Mapa da Segurança Pública, uma publicação anual do MJSP, representa um avanço significativo na gestão e transparência dos dados de segurança pública no Brasil. Ele sistematiza e publiciza, de forma organizada, os principais indicadores criminais e estatísticas coletadas em âmbito nacional, servindo como referência para a formulação de políticas públicas, diagnósticos e pesquisas. 
+    
+    Além disso, reforça o compromisso do Ministério com a divulgação regular e padronizada dessas informações, promovendo maior transparência e apoio à tomada de decisões estratégicas na área da segurança.
+    """)
+    
+    st.markdown("---")
+
+    # --- SEÇÃO SOBRE A SENASP (DENTRO DE UM EXPANSOR) ---
+    with st.expander("Clique para ler sobre as atribuições da Secretaria Nacional de Segurança Pública (SENASP)"):
+        st.write("""
+        A Secretaria Nacional de Segurança Pública – SENASP foi criada pelo Decreto nº 2.315, de 4 de setembro de 1997.
+        
+        A SENASP é responsável por formular políticas, diretrizes e ações para a segurança pública no país. Possui como objetivo promover a integração e a coordenação entre as diferentes esferas governamentais e agências de segurança para enfrentar desafios relacionados à segurança pública, como a prevenção de crimes, combate à violência e capacitação de profissionais da área.
+        
+        Compete à SENASP o assessoramento técnico ao Ministro da Justiça, integrando os entes federativos e os órgãos que compõem o Sistema Único de Segurança Pública (SUSP), além de promover a gestão do Fundo Nacional de Segurança Pública (FNSP).
+        """)
 
     # Rodapé
     st.markdown("---")
