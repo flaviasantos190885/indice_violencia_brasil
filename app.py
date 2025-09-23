@@ -378,6 +378,15 @@ elif st.session_state.pagina_selecionada == "🧠 Módulo de Previsão":
                 if evento_selecionado != "Todos": df_filtrado_pred = df_filtrado_pred[df_filtrado_pred['evento'] == evento_selecionado]
                 if arma_selecionada != "Todos": df_filtrado_pred = df_filtrado_pred[df_filtrado_pred['arma'] == arma_selecionada]
                 if faixa_selecionada != "Todos": df_filtrado_pred = df_filtrado_pred[df_filtrado_pred['faixa_etaria'] == faixa_selecionada]
+                
+                # 🔹 É AQUI QUE VOCÊ ENTRA COM O TRATAMENTO:
+                if df_filtrado_pred.empty:
+                    st.error("❌ Nenhum dado encontrado para os filtros escolhidos. Tente opções menos específicos.")
+                    return
+
+                if len(df_filtrado_pred) < 10:
+                    st.warning(f"⚠️ Dados históricos insuficientes ({len(df_filtrado_pred)} eventos) para gerar uma previsão confiável.")
+                    return
 
                 janela = 10
                 if len(df_filtrado_pred) < janela:
