@@ -357,14 +357,16 @@ elif st.session_state.pagina_selecionada == "🧠 Módulo de Previsão":
             col_filtros1, col_filtros2 = st.columns(2)
             with col_filtros1:
                 uf_selecionada = st.selectbox("Filtrar por UF (Opcional)", ["Todos"] + sorted(df_completo['uf'].unique()))
-                arma_selecionada = st.selectbox("Filtrar por Arma (Opcional)", ["Todos"] + sorted(df_completo['arma'].unique()))
-
                 # 🔹 Seleção dinâmica de cidades
                 if uf_selecionada != "Todos":
                     cidades_disponiveis = sorted(df_completo[df_completo['uf'] == uf_selecionada]['municipio'].unique())
                     cidade_selecionada = st.selectbox("Filtrar por Cidade (Opcional)", ["Todas"] + cidades_disponiveis)
                 else:
                     cidade_selecionada = "Todas"
+                    
+                arma_selecionada = st.selectbox("Filtrar por Arma (Opcional)", ["Todos"] + sorted(df_completo['arma'].unique()))
+
+                
 
             with col_filtros2:
                 evento_selecionado = st.selectbox("Filtrar por Evento (Opcional)", ["Todos"] + sorted(df_completo['evento'].unique()))
