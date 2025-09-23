@@ -10,12 +10,12 @@ from wordcloud import WordCloud
 import spacy
 import os
 
-# --- CONTROLE DE NAVEGAÇÃO ---
+#   Controle para navegação
 if 'pagina_selecionada' not in st.session_state:
     st.session_state.pagina_selecionada = "📊 Dashboard de Análise"
 
 
-# --- ADICIONADO: Carregar modelo de linguagem para stopwords ---
+#   Modelo de linguagem para stopwords
 try:
     nlp = spacy.load('pt_core_news_sm')
 except OSError:
@@ -23,12 +23,13 @@ except OSError:
     spacy.cli.download("pt_core_news_sm")
     nlp = spacy.load('pt_core_news_sm')
 
-# --- CONFIGURAÇÃO DA PÁGINA E AVISOS ---
+#   Página de avisos 
 st.set_page_config(layout="wide", page_title="Análise de Violência no Brasil")
+
 warnings.filterwarnings("ignore", category=FutureWarning)
 
-# --- FUNÇÃO DE CACHE PARA CARREGAR OS ATIVOS DE PREVISÃO ---
-# @st.cache_resource garante que o modelo pesado e os arquivos sejam carregados apenas uma vez.
+#   Carregamento de arquivos de previsão
+#   @st.cache_resource garante que o modelo pesado e os arquivos sejam carregados apenas uma vez.
 @st.cache_resource
 def carregar_ativos_previsao():
     """Carrega o modelo, o pré-processador e o normalizador salvos."""
@@ -40,21 +41,18 @@ def carregar_ativos_previsao():
     except FileNotFoundError:
         return None, None, None
 
-# --- CARREGAMENTO INICIAL DE DADOS ---
-# Carrega o dataset para o dashboard e para a lógica de previsão
+#   Carrega o dataset para o dashboard e para a lógica de previsão
 try:
     df_completo = pd.read_csv("Dados_2015_2024.csv")
     df_completo['data_referencia'] = pd.to_datetime(df_completo['data_referencia'], errors='coerce')
 except FileNotFoundError:
     st.error("Erro: O arquivo 'Dados_2015_2024.csv' não foi encontrado. Por favor, coloque-o na mesma pasta.")
-    st.stop() # Interrompe a execução se o arquivo principal não for encontrado
+    st.stop() 
 
 
 with st.sidebar:
     st.markdown("<h2 style='text-align: center; font-size: 25px; color: white'> Dados da Violência no Brasil</h2>", unsafe_allow_html=True)
-    #st.header("Dados Violência Brasil")
     
-    # --- CÓDIGO CSS ATUALIZADO ---
     st.markdown("""
     <style>
         /* Espaçamento para o menu radio */
@@ -63,15 +61,14 @@ with st.sidebar:
         }
 
         /* --- CSS PARA OS BOTÕES DE EMOJI --- */
-        /* Seleciona os botões dentro do bloco horizontal da barra lateral */
         [data-testid="stSidebar"] [data-testid="stHorizontalBlock"] button {
-            background-color: transparent; /* Fundo invisível */
-            border: none;                 /* Sem borda */
-            padding: 0 !important;        /* Sem espaçamento interno */
-            font-size: 24px;              /* Tamanho do emoji */
-            color: white !important;      /* Garante que o emoji seja branco */
-            text-decoration: none;        /* Sem sublinhado */
-            transition: transform 0.1s ease-in-out; /* Efeito suave */
+            background-color: transparent; 
+            border: none;                
+            padding: 0 !important;        
+            font-size: 24px;              
+            color: white !important;      
+            text-decoration: none;        
+            transition: transform 0.1s ease-in-out; 
         }
 
         /* Efeito ao passar o mouse */
@@ -88,30 +85,28 @@ with st.sidebar:
     </style>
     """, unsafe_allow_html=True)
 
-    # --- MENU DE EMOJIS NA BARRA LATERAL ---
     col1, col2, col3, col4, col5, col6 = st.columns(6)
     with col1:
-        if st.button("🏠", use_container_width=True, help="Página Inicial (Dashboard)"):
+        if st.button("🏠", use_container_width=True):
             st.session_state.pagina_selecionada = "📊 Dashboard de Análise"
     with col2:
-        if st.button("📊", use_container_width=True, help="Dashboard de Análise"):
+        if st.button("📊", use_container_width=True):
             st.session_state.pagina_selecionada = "📊 Dashboard de Análise"
     with col3:
-        if st.button("🧠", use_container_width=True, help="Módulo de Previsão"):
+        if st.button("🧠", use_container_width=True):
             st.session_state.pagina_selecionada = "🧠 Módulo de Previsão"
     with col4:
-        if st.button("📜", use_container_width=True, help="Análise de Palavras"):
+        if st.button("📜", use_container_width=True):
             st.session_state.pagina_selecionada = "📜 Análise de Palavras"
     with col5:
-        if st.button("⚙️", use_container_width=True, help="Detalhes Técnicos"):
+        if st.button("⚙️", use_container_width=True):
             st.session_state.pagina_selecionada = "⚙️ Detalhes Técnicos"
     with col6:
-        if st.button("ℹ️", use_container_width=True, help="Sobre o Projeto"):
+        if st.button("ℹ️", use_container_width=True):
             st.session_state.pagina_selecionada = "ℹ️ Sobre o Projeto"
     
-    st.markdown("---") # Linha divisória entre os menus
+    st.markdown("---") 
 
-    # --- SEU MENU RADIO, AGORA 100% SINCRONIZADO ---
     opcoes_menu = (
         "📊 Dashboard de Análise", "🧠 Módulo de Previsão", "📜 Análise de Palavras", 
         "⚙️ Detalhes Técnicos", "ℹ️ Sobre o Projeto"
@@ -142,16 +137,13 @@ with st.sidebar:
     """, unsafe_allow_html=True)
     
     
-# ==============================================================================
-# --- SEÇÃO 1: DASHBOARD DE ANÁLISE (RESTAURADA DO ORIGINAL) ---
-# ==============================================================================
+#   Dashboard de Análise
 if st.session_state.pagina_selecionada == "📊 Dashboard de Análise":
 
     df = df_completo.copy()
     df['Ano'] = df['data_referencia'].dt.year
     df['Mes'] = df['data_referencia'].dt.month_name()
 
-    # Traduz meses
     meses_pt = {
         'January': 'Janeiro', 'February': 'Fevereiro', 'March': 'Março', 'April': 'Abril',
         'May': 'Maio', 'June': 'Junho', 'July': 'Julho', 'August': 'Agosto',
@@ -159,18 +151,15 @@ if st.session_state.pagina_selecionada == "📊 Dashboard de Análise":
     }
     df['Mes'] = df['Mes'].map(meses_pt)
 
-    # ---------- TÍTULO GLOBAL ----------
     st.markdown("<h1 style='text-align: center; font-size: 40px; color: white'>📊 Dados da Violência no Brasil</h1>", unsafe_allow_html=True)
-    
     
     st.info("Exploração detalhada dos dados sobre a violência no Brasil. Utilize os filtros de Ano, Estado e Tipo de Evento para visualizar os gráficos e a tabela com informações específicas. Dica: ao selecionar um único estado, o filtro por cidade será habilitado para uma análise ainda mais granular.")
 
-    # Filtros disponíveis
+    # Filtros para seleção de previsão
     anos = sorted(df['Ano'].unique())
     todos_estados = sorted(df['uf'].unique())
     eventos = sorted(df['evento'].unique())
 
-    # Filtros
     col1, col2, col3 = st.columns(3)
 
     with col1:
@@ -187,13 +176,11 @@ if st.session_state.pagina_selecionada == "📊 Dashboard de Análise":
     with col3:
         evento_input = st.selectbox("Tipo de Evento", ["Todos"] + eventos, key="evento")
 
-    # Estados filtrados
     if not estado_selecionado:
         estados_filtrados = todos_estados
     else:
         estados_filtrados = estado_selecionado
 
-    # Filtro de cidade condicional
     if len(estados_filtrados) == 1:
         cidades = df[df['uf'] == estados_filtrados[0]]['municipio'].sort_values().unique()
         cidade_input = st.selectbox("Selecione a Cidade", ["Todas"] + list(cidades), index=0, key="cidade")
@@ -201,7 +188,6 @@ if st.session_state.pagina_selecionada == "📊 Dashboard de Análise":
         st.selectbox("Selecione a Cidade", ["Todas"], index=0, disabled=True, key="cidade_disabled")
         cidade_input = "Todas"
 
-    # Aplicando filtros
     df_filtrado = df[df['Ano'] == ano_selecionado]
     df_filtrado = df_filtrado[df_filtrado['uf'].isin(estados_filtrados)]
 
@@ -211,27 +197,21 @@ if st.session_state.pagina_selecionada == "📊 Dashboard de Análise":
     if evento_input != "Todos":
         df_filtrado = df_filtrado[df_filtrado['evento'] == evento_input]
 
-    # ---------- TÍTULO ESPECÍFICO (VERSÃO ATUALIZADA) ----------
-
-    # 1. CALCULAMOS O TOTAL DE VÍTIMAS DO DATAFRAME JÁ FILTRADO
+    #   Total de vítimas pelo dataframe já filtrado
     total_vitimas = df_filtrado['total_vitima'].sum()
-    # Formata o número para ter separador de milhar (ex: 12.345)
+    #   Formata o número para ter separador de milhar (ex: 12.345)
     total_formatado = f"{total_vitimas:,}".replace(',', '.')
 
-    # 2. DEFINIMOS A PARTE INICIAL DO TÍTULO
     if evento_input == "Todos":
         titulo_base = f"Casos de violência no Brasil - {ano_selecionado}"
     else:
         titulo_base = f"{evento_input} - {ano_selecionado}"
 
-    # 3. JUNTAMOS TUDO NO TÍTULO FINAL E EXIBIMOS
-    # Note que adicionei "Total de Vítimas:" para dar contexto ao número
     titulo_final = f"{titulo_base} (Total de Vítimas: {total_formatado})"
 
-    # Diminuí um pouco a fonte para caber melhor na tela
     st.markdown(f"<h2 style='font-size: 32px; color: white; font-weight: bold !important;'>{titulo_final}</h2>", unsafe_allow_html=True)
 
-    # ---------- GRÁFICO DE BARRAS ----------
+    #   Gráfico de Barras
     st.markdown("<h3 style='font-size: 22px; color: white;'>Total de Vítimas por Estado</h3>", unsafe_allow_html=True)
     df_barra = df_filtrado.groupby('uf')['total_vitima'].sum().reset_index()
 
@@ -250,19 +230,15 @@ if st.session_state.pagina_selecionada == "📊 Dashboard de Análise":
     fig_barra.update_traces(width=0.6)
     st.plotly_chart(fig_barra)
 
-# ---------- GRÁFICO DE LINHA (por Estado) ----------
+    #   Gráfico de Linhas
     st.subheader("Evolução Mensal dos Casos por Estado")
 
-    # Agrupa por estado e mês
     df_linha = df_filtrado.groupby(['uf', 'Mes'])['total_vitima'].sum().reset_index()
-
-    # Garante a ordem correta dos meses
     ordem_meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
                 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro']
     df_linha['Mes'] = pd.Categorical(df_linha['Mes'], categories=ordem_meses, ordered=True)
     df_linha = df_linha.sort_values(['uf', 'Mes'])
 
-    # Cria gráfico com uma linha por estado
     fig_linha = px.line(
         df_linha,
         x='Mes',
@@ -280,7 +256,7 @@ if st.session_state.pagina_selecionada == "📊 Dashboard de Análise":
     st.plotly_chart(fig_linha)
 
 
-    # ---------- GRÁFICO DE PIZZA ----------
+    #   Gráfico de Pizza
     st.subheader("Distribuição de Tipos de Armas por Faixa Etária")
     col4, col5 = st.columns(2)
 
@@ -319,7 +295,7 @@ if st.session_state.pagina_selecionada == "📊 Dashboard de Análise":
     else:
         st.warning("Nenhum dado disponível para os filtros selecionados.")
 
-    # ---------- TABELA ----------
+    #   Tabela
     colunas_para_mostrar = df_filtrado.drop(columns=['Ano'])
     colunas_para_mostrar = colunas_para_mostrar[
         (df_filtrado['feminino'] >= 1) |
@@ -341,13 +317,12 @@ if st.session_state.pagina_selecionada == "📊 Dashboard de Análise":
     st.subheader("Dados Filtrados")
     st.dataframe(colunas_para_mostrar)
 
-    # Rodapé
+    #   Rodapé
     st.markdown("---")
     st.markdown("Desenvolvido por Flavia 💙")
 
-# ==============================================================================
-# --- SEÇÃO 2: MÓDULO DE PREVISÃO (VERSÃO COMPLETA E CORRIGIDA) ---
-# ==============================================================================
+    #   Previsão do modelo 
+
 elif st.session_state.pagina_selecionada == "🧠 Módulo de Previsão":
     
     st.markdown("<h1 style='text-align: center; color: white;'>🧠 Módulo de Previsão Anual</h1>", unsafe_allow_html=True)
@@ -365,22 +340,18 @@ elif st.session_state.pagina_selecionada == "🧠 Módulo de Previsão":
     4.  Clique em **'Calcular Estimativa'** e aguarde o modelo processar os dados.
     """)
 
-    # Carrega o modelo e os pré-processadores
     model, preprocessor, y_scaler = carregar_ativos_previsao()
     
     if not model:
         st.error("Arquivos de modelo não encontrados! Certifique-se de que 'melhor_modelo_multivariado.keras', 'preprocessor.joblib' e 'y_scaler.joblib' estão na pasta.")
         st.stop()
         
-    # Botão para abrir o popup (dialog) de previsão
     if st.button("🚀 Iniciar Nova Previsão", type="primary"):
         
-        # A sintaxe correta do st.dialog usa um decorador em uma função
         @st.dialog("Parâmetros da Previsão", width="large")
         def prediction_dialog():
             st.markdown("#### Preencha os campos para gerar a estimativa:")
             
-            # INPUTS DENTRO DO POPUP
             ano_desejado = st.number_input("Digite o ANO para a previsão (Obrigatório)", min_value=df_completo['Ano'].max() + 1, value=df_completo['Ano'].max() + 1, step=1)
             
             col_filtros1, col_filtros2 = st.columns(2)
@@ -391,17 +362,14 @@ elif st.session_state.pagina_selecionada == "🧠 Módulo de Previsão":
                 evento_selecionado = st.selectbox("Filtrar por Evento (Opcional)", ["Todos"] + sorted(df_completo['evento'].unique()))
                 faixa_selecionada = st.selectbox("Filtrar por Faixa Etária (Opcional)", ["Todos"] + sorted(df_completo['faixa_etaria'].unique()))
 
-            # BOTÃO PARA CALCULAR DENTRO DO POPUP
             if st.button("Calcular Estimativa"):
                 df_filtrado_pred = df_completo.copy()
-                
-                # Aplica filtros opcionais
+
                 if uf_selecionada != "Todos": df_filtrado_pred = df_filtrado_pred[df_filtrado_pred['uf'] == uf_selecionada]
                 if evento_selecionado != "Todos": df_filtrado_pred = df_filtrado_pred[df_filtrado_pred['evento'] == evento_selecionado]
                 if arma_selecionada != "Todos": df_filtrado_pred = df_filtrado_pred[df_filtrado_pred['arma'] == arma_selecionada]
                 if faixa_selecionada != "Todos": df_filtrado_pred = df_filtrado_pred[df_filtrado_pred['faixa_etaria'] == faixa_selecionada]
 
-                # Lógica de previsão
                 janela = 10
                 if len(df_filtrado_pred) < janela:
                     st.error(f"Dados históricos insuficientes ({len(df_filtrado_pred)} eventos) para o cenário. Tente filtros menos específicos.")
@@ -415,19 +383,13 @@ elif st.session_state.pagina_selecionada == "🧠 Módulo de Previsão":
                         evento_futuro_template['Ano'] = ano_desejado
                         
                         sequencia_final_df = pd.concat([sequencia_base, evento_futuro_template], ignore_index=True)
-                        
-                        # --- EXPLICAÇÃO DA MUDANÇA ---
-                        # A correção do erro anterior está aqui. A ordem das linhas foi trocada.
-                        
-                        # 1. PRIMEIRO, criamos o DataFrame 'X_para_prever'
+
                         X_para_prever = sequencia_final_df.drop(columns=['total_vitima', 'data_referencia', 'municipio'])
 
-                        # 2. DEPOIS, com a variável já criada, fazemos o loop para ajustar os tipos
                         for col in X_para_prever.select_dtypes(include=['object']).columns:
                             if col in preprocessor.feature_names_in_:
                                 X_para_prever[col] = X_para_prever[col].astype('category')
                         
-                        # Continuação da lógica...
                         X_processado = preprocessor.transform(X_para_prever)
                         X_final = np.reshape(X_processado, (1, X_processado.shape[0], X_processado.shape[1]))
                         
@@ -443,21 +405,16 @@ elif st.session_state.pagina_selecionada == "🧠 Módulo de Previsão":
                     value=f"{int(previsao_anual_total)}",
                     delta_color="off"
                 )
-                # st.caption(f"Cálculo baseado em uma previsão de {int(vitimas_por_evento)} vítimas por evento, multiplicado pela média de {media_eventos_ano:.1f} eventos/ano para o cenário escolhido.")
         
-        # Esta linha chama a função que definimos acima, fazendo o dialog aparecer
         prediction_dialog()
 
-    # Rodapé
         st.markdown("---")
         st.markdown("Desenvolvido por Flavia 💙")
 
-# ==============================================================================
-# --- SEÇÃO 3: ANÁLISE DE PALAVRAS (VERSÃO COM CONTROLE FINO) ---
-# ==============================================================================
+#   Análise de Palavras
 elif st.session_state.pagina_selecionada == "📜 Análise de Palavras":
 
-    st.markdown("<h1 style='text-align: center; color: white;'>📜 Análise de Tipos de Evento</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='text-align: center; color: white;'>📜 Análise de Palavras - Tipos de Evento</h1>", unsafe_allow_html=True)
     st.info("Frequência dos eventos exibidas em Nuvem de Palavras e através de uma tabela de percentual de cada evento.")
 
     try:
@@ -465,12 +422,7 @@ elif st.session_state.pagina_selecionada == "📜 Análise de Palavras":
 
         st.subheader("Frequência de Tipos de Evento")
         
-        # --- MUDANÇA 1: CONTROLE FINO DO TAMANHO DAS FRASES ---
-        # Criei um "fator de escala" para controlar a diferença de tamanho.
-        # 1.0 = diferença máxima (original)
-        # 0.5 = raiz quadrada (diferença média) <-- BOM PONTO DE PARTIDA
-        # < 0.5 = diferenças cada vez menores
-        fator_de_escala = 0.5 
+        fator_de_escala = 0.5
         
         dicionario_frases_escalonado = dict(zip(
             df_frequencia_frase['Frase'], 
@@ -490,13 +442,10 @@ elif st.session_state.pagina_selecionada == "📜 Análise de Palavras":
             ax_frases.imshow(wordcloud_frases, interpolation="bilinear")
             ax_frases.axis("off")
 
-            # --- MUDANÇA 2: CONTROLE PRECISO DO TAMANHO DO QUADRO ---
-            # Usamos colunas para criar "margens" e forçar o gráfico a ficar menor no centro
             col1, col2, col3 = st.columns([1, 6, 1])
             with col2:
                 st.pyplot(fig_frases)
 
-        # A tabela de frequência continua a mesma, mostrando os números reais
         with st.expander("Ver Tabela de Frequência Completa de Eventos"):
             df_frequencia_frase['Porcentagem'] = df_frequencia_frase['Porcentagem'].map('{:.2f}%'.format)
             st.dataframe(df_frequencia_frase, use_container_width=True, hide_index=True)
@@ -506,13 +455,11 @@ elif st.session_state.pagina_selecionada == "📜 Análise de Palavras":
     except Exception as e:
         st.error(f"Ocorreu um erro na análise de eventos: {e}")
 
-    # Rodapé
     st.markdown("---")
     st.markdown("Desenvolvido por Flavia 💙")
     
-    # ==============================================================================
-# --- SEÇÃO 4: DETALHES TÉCNICOS DO PROJETO (VERSÃO FINAL) ---
-# ==============================================================================
+    #   Sobre as Tecnologias 
+    
 elif st.session_state.pagina_selecionada == "⚙️ Detalhes Técnicos":
 
     st.markdown("<h1 style='text-align: center; color: white;'>⚙️ Detalhes Técnicos do Projeto</h1>", unsafe_allow_html=True)
@@ -520,7 +467,6 @@ elif st.session_state.pagina_selecionada == "⚙️ Detalhes Técnicos":
 
     st.markdown("---")
 
-    # --- SEÇÃO DE TECNOLOGIAS ---
     st.subheader("Tecnologias e Linguagens Utilizadas")
     st.markdown("""
     A ferramenta foi desenvolvida inteiramente na linguagem **Python**, utilizando um conjunto de bibliotecas especializadas para cada etapa do projeto:
@@ -532,12 +478,11 @@ elif st.session_state.pagina_selecionada == "⚙️ Detalhes Técnicos":
 
     st.markdown("---")
 
-    # --- SEÇÃO DO MODELO DE PREVISÃO ---
     st.subheader("Modelo de Previsão: Rede Neural LSTM")
     st.write("""
     O módulo de previsão utiliza um modelo de **Rede Neural Recorrente (RNN)** do tipo **LSTM (Long Short-Term Memory)**. Este tipo de arquitetura é especialmente eficaz para analisar sequências, pois consegue "lembrar" de informações de passos anteriores para prever valores futuros.
     """)
-    # Usando st.expander para criar a seção "Saiba Mais"
+
     with st.expander("Sobre o modelo LSTM"):
         st.markdown("""
         A **Rede Neural LSTM (Long Short-Term Memory)** é um tipo avançado de Rede Neural Recorrente (RNN), projetada especificamente para aprender com sequências de dados, como séries temporais ou texto.
@@ -569,9 +514,8 @@ elif st.session_state.pagina_selecionada == "⚙️ Detalhes Técnicos":
         - **Validação:** Os dados foram divididos em conjuntos de treino e teste para garantir a generalização do modelo para dados não vistos.
         """)
         
-    st.markdown("---") # Linha divisória
-
-    # --- NOVA SEÇÃO DE VERSIONAMENTO E DEPLOY ---
+    st.markdown("---") 
+    
     st.subheader("Versionamento e Deploy Contínuo")
     st.markdown("""
     Todo o código-fonte e os ativos do projeto são gerenciados e versionados com **Git** e estão hospedados em um repositório no **GitHub** chamado `dados-violencia-brasil`.
@@ -594,15 +538,11 @@ elif st.session_state.pagina_selecionada == "⚙️ Detalhes Técnicos":
     [https://dados-violencia-brasil-2015-a-2024.streamlit.app/](https://dados-violencia-brasil-2015-a-2024.streamlit.app/)
     """)
 
-
-    # Rodapé
     st.markdown("---")
     st.markdown("Desenvolvido por Flavia 💙")
     
 
-# ==============================================================================
-# --- SEÇÃO 5: SOBRE O PROJETO ---
-# ==============================================================================
+#   Sobre o Projeto
 elif st.session_state.pagina_selecionada == "ℹ️ Sobre o Projeto":
 
     st.markdown("<h1 style='text-align: center; color: white;'>ℹ️ Sobre o Projeto e a Fonte dos Dados</h1>", unsafe_allow_html=True)
@@ -610,7 +550,6 @@ elif st.session_state.pagina_selecionada == "ℹ️ Sobre o Projeto":
 
     st.markdown("---")
 
-    # --- SEÇÃO SOBRE A FONTE DOS DADOS ---
     st.subheader("Fonte dos Dados")
     st.markdown("""
     Os dados utilizados neste projeto foram coletados do portal do **Ministério da Justiça e Segurança Pública (MJSP)**, através da Secretaria Nacional de Segurança Pública (SENASP). 
@@ -624,7 +563,6 @@ elif st.session_state.pagina_selecionada == "ℹ️ Sobre o Projeto":
 
     st.markdown("---")
 
-    # --- SEÇÃO SOBRE O MAPA DA SEGURANÇA ---
     st.subheader("O Mapa da Segurança Pública")
     st.write("""
     O Mapa da Segurança Pública, uma publicação anual do MJSP, representa um avanço significativo na gestão e transparência dos dados de segurança pública no Brasil. Ele sistematiza e publiciza, de forma organizada, os principais indicadores criminais e estatísticas coletadas em âmbito nacional, servindo como referência para a formulação de políticas públicas, diagnósticos e pesquisas. 
@@ -634,7 +572,6 @@ elif st.session_state.pagina_selecionada == "ℹ️ Sobre o Projeto":
     
     st.markdown("---")
 
-    # --- SEÇÃO SOBRE A SENASP (DENTRO DE UM EXPANSOR) ---
     with st.expander("Clique para ler sobre as atribuições da Secretaria Nacional de Segurança Pública (SENASP)"):
         st.write("""
         A Secretaria Nacional de Segurança Pública – SENASP foi criada pelo Decreto nº 2.315, de 4 de setembro de 1997.
@@ -644,6 +581,5 @@ elif st.session_state.pagina_selecionada == "ℹ️ Sobre o Projeto":
         Compete à SENASP o assessoramento técnico ao Ministro da Justiça, integrando os entes federativos e os órgãos que compõem o Sistema Único de Segurança Pública (SUSP), além de promover a gestão do Fundo Nacional de Segurança Pública (FNSP).
         """)
 
-    # Rodapé
     st.markdown("---")
     st.markdown("Desenvolvido por Flavia 💙")
