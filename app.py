@@ -429,6 +429,9 @@ elif st.session_state.pagina_selecionada == "🧠 Módulo de Previsão":
                         previsao_anual_total = vitimas_por_evento * media_eventos_ano
                     
                     st.success("Previsão Concluída!")
+                    
+                        # --- CORREÇÃO: A LINHA ABAIXO CHAMA O DIALOG PARA APARECER ---
+                    prediction_dialog()    
                     st.metric(
                         label=f"Estimativa de Vítimas para {ano_desejado}",
                         value=f"{int(previsao_anual_total)}",
