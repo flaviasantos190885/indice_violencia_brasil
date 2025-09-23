@@ -385,12 +385,12 @@ elif st.session_state.pagina_selecionada == "🧠 Módulo de Previsão":
                     return
 
                 if len(df_filtrado_pred) < 10:
-                    st.warning(f"⚠️ Dados históricos insuficientes, é necessário pelo menos ({len(df_filtrado_pred)} eventos) para gerar uma previsão confiável.")
+                    st.warning(f"⚠️ Dados históricos insuficientes, é necessário pelo menos {len(df_filtrado_pred)} eventos para gerar uma previsão confiável.")
                     return
 
                 janela = 10
                 if len(df_filtrado_pred) < janela:
-                    st.error(f"Dados históricos insuficientes é necessário pelo menos ({len(df_filtrado_pred)} eventos) para o cenário. Tente filtros menos específicos.")
+                    st.error(f"Dados históricos insuficientes é necessário pelo menos {len(df_filtrado_pred)} eventos para o cenário. Tente filtros menos específicos.")
                 else:
                     with st.spinner("Calculando... O modelo está processando os dados."):
                         num_anos_historico = df_filtrado_pred['Ano'].nunique()
