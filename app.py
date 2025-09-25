@@ -257,79 +257,47 @@ if st.session_state.pagina_selecionada == "📊 Dashboard de Análise":
 
     fig_linha.update_traces(textposition='top center')
     st.plotly_chart(fig_linha)
-    
 
-    # 🔹 Subtítulo
-    st.subheader("Mapa Geográfico - Distribuição por Estado")
 
-    # 🔹 GeoJSON do Brasil
-    url_geojson = "https://raw.githubusercontent.com/codeforamerica/click_that_hood/master/public/data/brazil-states.geojson"
-    geojson_estados = requests.get(url_geojson).json()
+    # 🔹 Exemplo de dados
+    dados = {
+        "estado": ["SP", "RJ", "MG", "BA", "RS", "PR", "SC", "PE"],
+        "vitimas": [10500, 7200, 6800, 6400, 4300, 4100, 3900, 3500]
+    }
+    df = pd.DataFrame(dados)
 
-    # 🔹 Dados
-    df_mapa = df_filtrado.groupby('uf')['total_vitima'].sum().reset_index()
-
-    # 🔹 Figura inicial
+    # 🔹 Cria o mapa coroplético
     fig_mapa = px.choropleth(
-        df_mapa,
-        geojson=geojson_estados,
-        locations='uf',
-        featureidkey="properties.sigla",
-        color='total_vitima',
+        df,
+        geojson="https://raw.githubusercontent.com/codeforamerica/click_that_hood/master/public/data/brazil-states.geojson",
+        locations="estado",
+        featureidkey="properties.sigla",  # depende do geojson que você está usando
+        color="vitimas",
         color_continuous_scale="YlOrRd",
-        hover_data={'uf': True, 'total_vitima': True},
-        labels={'total_vitima': 'Total de Vítimas'},
-        title=f"Distribuição Geográfica de Vítimas - {ano_selecionado}"
+        title="Mapa de Violência no Brasil"
     )
 
-    fig_mapa.update_geos(fitbounds="locations", visible=False)
+    # 🔹 Travar interações (zoom, clique, arrastar)
+    fig_mapa.update_geos(
+        fitbounds="locations",
+        visible=False,
+        fixedrange=True   # trava zoom/pan
+    )
 
     fig_mapa.update_layout(
-        autosize=True,
-        height=600,
-        margin={"r":0,"t":50,"l":0,"b":0},
-        paper_bgcolor='rgba(0,0,0,0)',
-        plot_bgcolor='rgba(0,0,0,0)',
-        geo=dict(bgcolor='rgba(0,0,0,0)'),
-        coloraxis_colorbar=dict(
-            title="Nº de Vítimas",
-            thickness=15,
-            len=0.8
-        )
+        dragmode=False,  # bloqueia arrastar
+        margin={"r":0, "t":30, "l":0, "b":0}
     )
 
-    fig_mapa.update_traces(
-        hovertemplate="<b>%{location}</b><br>Total de Vítimas: %{z}<extra></extra>",
-        marker_line_width=1,
-        marker_line_color="black"
-    )
-
-    # 🔹 Captura de clique no mapa
-    selected_points = plotly_events(
+    # 🔹 Mostrar no Streamlit (sem barra de ferramentas e sem zoom)
+    st.plotly_chart(
         fig_mapa,
-        click_event=True,
-        hover_event=False,
-        select_event=False,
-        override_height=600,
-        override_width="100%"
+        use_container_width=True,
+        config={
+            "scrollZoom": False,     # 🚫 sem zoom do mouse
+            "displayModeBar": False  # 🚫 sem barra de ferramentas
+        }
     )
-
-    # 🔹 Se clicou em algum estado, aplicar zoom só nele
-    if selected_points:
-        estado_clicado = selected_points[0]['location']
-        st.write(f"🔎 Estado selecionado: **{estado_clicado}**")
-
-        # Novo gráfico apenas para o estado clicado
-        fig_zoom = px.choropleth(
-            df_mapa[df_mapa['uf'] == estado_clicado],
-            geojson=geojson_estados,
-            locations='uf',
-            featureidkey="properties.sigla",
-            color='total_vitima',
-            color_continuous_scale="YlOrRd"
-        )
-        fig_zoom.update_geos(fitbounds="locations", visible=False)
-        st.plotly_chart(fig_zoom, use_container_width=True)
 
 
 
