@@ -257,51 +257,28 @@ if st.session_state.pagina_selecionada == "📊 Dashboard de Análise":
     fig_linha.update_traces(textposition='top center')
     st.plotly_chart(fig_linha)
     
-        # 🌍 Gráfico de Mapa - Total de Vítimas por Estado
-    st.subheader("Mapa Geográfico - Distribuição por Estado")
+    estado_destacado = st.sidebar.selectbox("🔎 Destacar Estado", ["Nenhum"] + sorted(df_mapa['uf'].unique()))
 
-    url_geojson = "https://raw.githubusercontent.com/codeforamerica/click_that_hood/master/public/data/brazil-states.geojson"
-    geojson_estados = requests.get(url_geojson).json()
+if estado_destacado != "Nenhum":
+    df_mapa['destaque'] = df_mapa['uf'].apply(lambda x: 1 if x == estado_destacado else 0)
+else:
+    df_mapa['destaque'] = 0
 
-    df_mapa = df_filtrado.groupby('uf')['total_vitima'].sum().reset_index()
+fig_mapa = px.choropleth(
+    df_mapa,
+    geojson=geojson_estados,
+    locations='uf',
+    featureidkey="properties.sigla",
+    color='total_vitima',
+    color_continuous_scale="YlOrRd",
+    hover_data={'uf': True, 'total_vitima': True},
+)
 
-    fig_mapa = px.choropleth(
-        df_mapa,
-        geojson=geojson_estados,
-        locations='uf',
-        featureidkey="properties.sigla",
-        color='total_vitima',
-        color_continuous_scale="YlOrRd",
-        hover_data={'uf': True, 'total_vitima': True},
-        labels={'total_vitima': 'Total de Vítimas'},
-        title=f"Distribuição Geográfica de Vítimas - {ano_selecionado}"
-    )
+# deixa o estado escolhido com borda grossa
+if estado_destacado != "Nenhum":
+    fig_mapa.update_traces(marker_line_width=df_mapa['destaque']*3 + 1)
 
-    # 🔧 Melhorias de estilo
-    fig_mapa.update_geos(fitbounds="locations", visible=False)
-
-    fig_mapa.update_layout(
-        autosize=True,
-        height=600,  # aumenta o tamanho do gráfico
-        margin={"r":0,"t":50,"l":0,"b":0},
-        paper_bgcolor='rgba(0,0,0,0)',  # fundo transparente
-        plot_bgcolor='rgba(0,0,0,0)',   # fundo transparente
-        geo=dict(bgcolor= 'rgba(0,0,0,0)'),  # remove fundo branco do mapa
-        coloraxis_colorbar=dict(
-            title="Nº de Vítimas",
-            thickness=15,
-            len=0.8
-        )
-    )
-
-    # Tornar o mapa mais dinâmico: destaque ao passar o mouse
-    fig_mapa.update_traces(
-        hovertemplate="<b>%{location}</b><br>Total de Vítimas: %{z}<extra></extra>",
-        marker_line_width=1,
-        marker_line_color="black"
-    )
-
-    st.plotly_chart(fig_mapa, use_container_width=True)
+st.plotly_chart(fig_mapa, use_container_width=True)
 
 
 
