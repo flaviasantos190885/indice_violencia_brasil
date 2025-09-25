@@ -9,6 +9,8 @@ import matplotlib.pyplot as plt
 from wordcloud import WordCloud
 import spacy
 import os
+import json
+import requests
 
 #   Controle para navegação
 if 'pagina_selecionada' not in st.session_state:
@@ -254,6 +256,30 @@ if st.session_state.pagina_selecionada == "📊 Dashboard de Análise":
 
     fig_linha.update_traces(textposition='top center')
     st.plotly_chart(fig_linha)
+    
+        # 🌍 Gráfico de Mapa - Total de Vítimas por Estado
+    st.subheader("Mapa Geográfico - Distribuição por Estado")
+
+    # Carregar GeoJSON dos estados do Brasil
+    url_geojson = "https://raw.githubusercontent.com/codeforamerica/click_that_hood/master/public/data/brazil-states.geojson"
+    geojson_estados = requests.get(url_geojson).json()
+
+    df_mapa = df_filtrado.groupby('uf')['total_vitima'].sum().reset_index()
+
+    fig_mapa = px.choropleth(
+        df_mapa,
+        geojson=geojson_estados,
+        locations='uf',
+        featureidkey="properties.sigla",  # chave do geojson
+        color='total_vitima',
+        color_continuous_scale="Reds",
+        labels={'total_vitima': 'Total de Vítimas'},
+        title=f"Distribuição Geográfica de Vítimas - {ano_selecionado}"
+    )
+
+    fig_mapa.update_geos(fitbounds="locations", visible=False)
+    st.plotly_chart(fig_mapa, use_container_width=True)
+
 
 
     #   Gráfico de Pizza
@@ -357,7 +383,7 @@ elif st.session_state.pagina_selecionada == "🧠 Módulo de Previsão":
             col_filtros1, col_filtros2 = st.columns(2)
             with col_filtros1:
                 uf_selecionada = st.selectbox("Filtrar por UF (Opcional)", ["Todos"] + sorted(df_completo['uf'].unique()))
-                # 🔹 Seleção dinâmica de cidades
+                
                 if uf_selecionada != "Todos":
                     cidades_disponiveis = sorted(df_completo[df_completo['uf'] == uf_selecionada]['municipio'].unique())
                     cidade_selecionada = st.selectbox("Filtrar por Cidade (Opcional)", ["Todas"] + cidades_disponiveis)
