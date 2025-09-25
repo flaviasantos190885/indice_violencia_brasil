@@ -266,28 +266,30 @@ if st.session_state.pagina_selecionada == "📊 Dashboard de Análise":
 
     df_mapa = df_filtrado.groupby('uf')['total_vitima'].sum().reset_index()
 
-    # Criar faixas (quantis) para dar mais camadas na legenda
-    df_mapa['faixa'] = pd.qcut(df_mapa['total_vitima'], q=6, duplicates="drop")
-
     fig_mapa = px.choropleth(
         df_mapa,
         geojson=geojson_estados,
         locations='uf',
         featureidkey="properties.sigla",
         color='total_vitima',
-        color_continuous_scale="YlOrRd",  # escala mais suave e clara
+        color_continuous_scale="YlOrRd",  # escala perceptual
         labels={'total_vitima': 'Total de Vítimas'},
-        hover_data={'uf': True, 'total_vitima': True, 'faixa': True},
+        hover_data={'uf': True, 'total_vitima': True},
         title=f"Distribuição Geográfica de Vítimas - {ano_selecionado}"
     )
 
-    # Ajustes de visualização
+    # Ajustar mapa
     fig_mapa.update_geos(fitbounds="locations", visible=False)
+
+    # Calcular quantis e converter para lista de ints
+    quantis = df_mapa['total_vitima'].quantile([0, 0.2, 0.4, 0.6, 0.8, 1]).tolist()
+    quantis_formatados = [int(v) for v in quantis]
+
     fig_mapa.update_layout(
         coloraxis_colorbar=dict(
             title="Nº de Vítimas",
-            tickvals=list(df_mapa['total_vitima'].quantile([0, 0.2, 0.4, 0.6, 0.8, 1])),
-            ticktext=[f"{int(v):,}".replace(",", ".") for v in df_mapa['total_vitima'].quantile([0, 0.2, 0.4, 0.6, 0.8, 1])]
+            tickvals=quantis_formatados,
+            ticktext=[f"{v:,}".replace(",", ".") for v in quantis_formatados]
         )
     )
 
