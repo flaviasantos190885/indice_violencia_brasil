@@ -266,18 +266,31 @@ if st.session_state.pagina_selecionada == "📊 Dashboard de Análise":
 
     df_mapa = df_filtrado.groupby('uf')['total_vitima'].sum().reset_index()
 
+    # Criar faixas (quantis) para dar mais camadas na legenda
+    df_mapa['faixa'] = pd.qcut(df_mapa['total_vitima'], q=6, duplicates="drop")
+
     fig_mapa = px.choropleth(
         df_mapa,
         geojson=geojson_estados,
         locations='uf',
-        featureidkey="properties.sigla",  # chave do geojson
+        featureidkey="properties.sigla",
         color='total_vitima',
-        color_continuous_scale="Reds",
+        color_continuous_scale="YlOrRd",  # escala mais suave e clara
         labels={'total_vitima': 'Total de Vítimas'},
+        hover_data={'uf': True, 'total_vitima': True, 'faixa': True},
         title=f"Distribuição Geográfica de Vítimas - {ano_selecionado}"
     )
 
+    # Ajustes de visualização
     fig_mapa.update_geos(fitbounds="locations", visible=False)
+    fig_mapa.update_layout(
+        coloraxis_colorbar=dict(
+            title="Nº de Vítimas",
+            tickvals=list(df_mapa['total_vitima'].quantile([0, 0.2, 0.4, 0.6, 0.8, 1])),
+            ticktext=[f"{int(v):,}".replace(",", ".") for v in df_mapa['total_vitima'].quantile([0, 0.2, 0.4, 0.6, 0.8, 1])]
+        )
+    )
+
     st.plotly_chart(fig_mapa, use_container_width=True)
 
 
