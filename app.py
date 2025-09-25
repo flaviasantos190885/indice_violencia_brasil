@@ -268,36 +268,40 @@ if st.session_state.pagina_selecionada == "📊 Dashboard de Análise":
 
     # 🔹 Cria o mapa coroplético
     fig_mapa = px.choropleth(
-        df,
-        geojson="https://raw.githubusercontent.com/codeforamerica/click_that_hood/master/public/data/brazil-states.geojson",
-        locations="estado",
-        featureidkey="properties.sigla",  # depende do geojson que você está usando
-        color="vitimas",
-        color_continuous_scale="YlOrRd",
-        title="Mapa de Violência no Brasil"
-    )
+    df,
+    geojson="https://raw.githubusercontent.com/codeforamerica/click_that_hood/master/public/data/brazil-states.geojson",
+    locations="estado",
+    featureidkey="properties.sigla",
+    color="vitimas",
+    color_continuous_scale="YlOrRd",
+    title="Mapa de Violência no Brasil"
+)
 
-    # 🔹 Travar interações (zoom, clique, arrastar)
-    fig_mapa.update_geos(
-        fitbounds="locations",
-        visible=False,
-        fixedrange=True   # trava zoom/pan
-    )
-
+    # 🔒 Travar zoom e movimento via layout
     fig_mapa.update_layout(
-        dragmode=False,  # bloqueia arrastar
-        margin={"r":0, "t":30, "l":0, "b":0}
+        geo=dict(
+            fitbounds="locations",
+            visible=False,
+            showcountries=True,
+            showframe=False,
+            showcoastlines=False,
+            projection_type="mercator"
+        ),
+        dragmode=False,  # impede arrastar
+        margin={"r":0,"t":30,"l":0,"b":0}
     )
 
-    # 🔹 Mostrar no Streamlit (sem barra de ferramentas e sem zoom)
+    # 🔒 Configurações do Streamlit: sem scroll e sem barra
     st.plotly_chart(
         fig_mapa,
         use_container_width=True,
         config={
-            "scrollZoom": False,     # 🚫 sem zoom do mouse
-            "displayModeBar": False  # 🚫 sem barra de ferramentas
+            "scrollZoom": False,     # bloqueia zoom do mouse
+            "doubleClick": False,    # bloqueia zoom com duplo clique
+            "displayModeBar": False  # tira barra de ferramentas
         }
     )
+
 
 
 
