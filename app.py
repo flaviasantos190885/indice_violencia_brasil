@@ -11,7 +11,6 @@ import spacy
 import os
 import json
 import requests
-from streamlit_plotly_events import plotly_events
 
 #   Controle para navegação
 if 'pagina_selecionada' not in st.session_state:
@@ -257,51 +256,52 @@ if st.session_state.pagina_selecionada == "📊 Dashboard de Análise":
 
     fig_linha.update_traces(textposition='top center')
     st.plotly_chart(fig_linha)
+    
+        # 🌍 Gráfico de Mapa - Total de Vítimas por Estado
+    st.subheader("Mapa Geográfico - Distribuição por Estado")
 
+    url_geojson = "https://raw.githubusercontent.com/codeforamerica/click_that_hood/master/public/data/brazil-states.geojson"
+    geojson_estados = requests.get(url_geojson).json()
 
-    # 🔹 Exemplo de dados
-    dados = {
-        "estado": ["SP", "RJ", "MG", "BA", "RS", "PR", "SC", "PE"],
-        "vitimas": [10500, 7200, 6800, 6400, 4300, 4100, 3900, 3500]
-    }
-    df = pd.DataFrame(dados)
+    df_mapa = df_filtrado.groupby('uf')['total_vitima'].sum().reset_index()
 
-    # 🔹 Cria o mapa coroplético
     fig_mapa = px.choropleth(
-    df,
-    geojson="https://raw.githubusercontent.com/codeforamerica/click_that_hood/master/public/data/brazil-states.geojson",
-    locations="estado",
-    featureidkey="properties.sigla",
-    color="vitimas",
-    color_continuous_scale="YlOrRd",
-    title="Mapa de Violência no Brasil"
-)
+        df_mapa,
+        geojson=geojson_estados,
+        locations='uf',
+        featureidkey="properties.sigla",
+        color='total_vitima',
+        color_continuous_scale="YlOrRd",
+        hover_data={'uf': True, 'total_vitima': True},
+        labels={'total_vitima': 'Total de Vítimas'},
+        title=f"Distribuição Geográfica de Vítimas - {ano_selecionado}"
+    )
 
-    # 🔒 Travar zoom e movimento via layout
+    # 🔧 Melhorias de estilo
+    fig_mapa.update_geos(fitbounds="locations", visible=False)
+
     fig_mapa.update_layout(
-        geo=dict(
-            fitbounds="locations",
-            visible=False,
-            showcountries=True,
-            showframe=False,
-            showcoastlines=False,
-            projection_type="mercator"
-        ),
-        dragmode=False,  # impede arrastar
-        margin={"r":0,"t":30,"l":0,"b":0}
+        autosize=True,
+        height=600,  # aumenta o tamanho do gráfico
+        margin={"r":0,"t":50,"l":0,"b":0},
+        paper_bgcolor='rgba(0,0,0,0)',  # fundo transparente
+        plot_bgcolor='rgba(0,0,0,0)',   # fundo transparente
+        geo=dict(bgcolor= 'rgba(0,0,0,0)'),  # remove fundo branco do mapa
+        coloraxis_colorbar=dict(
+            title="Nº de Vítimas",
+            thickness=15,
+            len=0.8
+        )
     )
 
-    # 🔒 Configurações do Streamlit: sem scroll e sem barra
-    st.plotly_chart(
-        fig_mapa,
-        use_container_width=True,
-        config={
-            "scrollZoom": False,     # bloqueia zoom do mouse
-            "doubleClick": False,    # bloqueia zoom com duplo clique
-            "displayModeBar": False  # tira barra de ferramentas
-        }
+    # Tornar o mapa mais dinâmico: destaque ao passar o mouse
+    fig_mapa.update_traces(
+        hovertemplate="<b>%{location}</b><br>Total de Vítimas: %{z}<extra></extra>",
+        marker_line_width=1,
+        marker_line_color="black"
     )
 
+    st.plotly_chart(fig_mapa, use_container_width=True)
 
 
 
