@@ -260,7 +260,6 @@ if st.session_state.pagina_selecionada == "📊 Dashboard de Análise":
         # 🌍 Gráfico de Mapa - Total de Vítimas por Estado
     st.subheader("Mapa Geográfico - Distribuição por Estado")
 
-    # Carregar GeoJSON dos estados do Brasil
     url_geojson = "https://raw.githubusercontent.com/codeforamerica/click_that_hood/master/public/data/brazil-states.geojson"
     geojson_estados = requests.get(url_geojson).json()
 
@@ -272,25 +271,34 @@ if st.session_state.pagina_selecionada == "📊 Dashboard de Análise":
         locations='uf',
         featureidkey="properties.sigla",
         color='total_vitima',
-        color_continuous_scale="YlOrRd",  # escala perceptual
-        labels={'total_vitima': 'Total de Vítimas'},
+        color_continuous_scale="YlOrRd",
         hover_data={'uf': True, 'total_vitima': True},
+        labels={'total_vitima': 'Total de Vítimas'},
         title=f"Distribuição Geográfica de Vítimas - {ano_selecionado}"
     )
 
-    # Ajustar mapa
+    # 🔧 Melhorias de estilo
     fig_mapa.update_geos(fitbounds="locations", visible=False)
 
-    # Calcular quantis e converter para lista de ints
-    quantis = df_mapa['total_vitima'].quantile([0, 0.2, 0.4, 0.6, 0.8, 1]).tolist()
-    quantis_formatados = [int(v) for v in quantis]
-
     fig_mapa.update_layout(
+        autosize=True,
+        height=600,  # aumenta o tamanho do gráfico
+        margin={"r":0,"t":50,"l":0,"b":0},
+        paper_bgcolor='rgba(0,0,0,0)',  # fundo transparente
+        plot_bgcolor='rgba(0,0,0,0)',   # fundo transparente
+        geo=dict(bgcolor= 'rgba(0,0,0,0)'),  # remove fundo branco do mapa
         coloraxis_colorbar=dict(
             title="Nº de Vítimas",
-            tickvals=quantis_formatados,
-            ticktext=[f"{v:,}".replace(",", ".") for v in quantis_formatados]
+            thickness=15,
+            len=0.8
         )
+    )
+
+    # Tornar o mapa mais dinâmico: destaque ao passar o mouse
+    fig_mapa.update_traces(
+        hovertemplate="<b>%{location}</b><br>Total de Vítimas: %{z}<extra></extra>",
+        marker_line_width=1,
+        marker_line_color="black"
     )
 
     st.plotly_chart(fig_mapa, use_container_width=True)
